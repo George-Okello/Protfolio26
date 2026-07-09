@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemaps can be added here if you generate one
+# Sitemap: https://gokello.me/sitemap.xml
