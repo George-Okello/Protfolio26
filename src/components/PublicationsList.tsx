@@ -14,23 +14,7 @@ function calculateReadingTime(text: string): number {
   return Math.max(1, Math.ceil(wordCount / 200));
 }
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15
-    }
-  }
-};
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }
-  }
-};
 
 function PublicationCard({ pub, isExpanded, toggleExpand, isDark, index }: { pub: Publication, isExpanded: boolean, toggleExpand: () => void, isDark: boolean, index: number, key?: string }) {
   const paperTypeLabel = pub.type === "Conference" ? "Conference Paper" : "Research Paper";
@@ -38,7 +22,10 @@ function PublicationCard({ pub, isExpanded, toggleExpand, isDark, index }: { pub
 
   return (
     <motion.div 
-      variants={itemVariants}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
       style={{ perspective: "1000px" }}
     >
       <div
@@ -171,13 +158,7 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                 <h4 className="text-[10px] uppercase tracking-widest mb-3 opacity-50 italic">
                   Conference Papers
                 </h4>
-                <motion.div 
-                  className="grid grid-cols-1 gap-4"
-                  variants={containerVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-50px" }}
-                >
+                <div className="grid grid-cols-1 gap-4">
                   {publications.filter(p => p.type === "Conference").map((pub, idx) => (
                     <PublicationCard 
                       key={pub.id} 
@@ -188,7 +169,7 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                       index={idx}
                     />
                   ))}
-                </motion.div>
+                </div>
               </div>
             )}
 
@@ -198,13 +179,7 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                 Academic Publications & Preprints
               </h4>
               
-              <motion.div 
-                className="grid grid-cols-1 gap-4"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-              >
+              <div className="grid grid-cols-1 gap-4">
                 {publications.filter(p => p.type !== "Conference").map((pub, idx) => (
                   <PublicationCard 
                     key={pub.id} 
@@ -215,7 +190,7 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                     index={idx}
                   />
                 ))}
-              </motion.div>
+              </div>
             </div>
           </div>
         )}
@@ -244,17 +219,14 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
               </div>
             )}
 
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredProjects.map((p, idx) => (
                 <motion.div 
                   key={p.id} 
-                  variants={itemVariants}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
                   style={{ perspective: "1000px" }}
                 >
                   <div
@@ -322,7 +294,7 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                 </div>
               </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         )}
 
