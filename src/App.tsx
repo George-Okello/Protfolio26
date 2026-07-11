@@ -36,12 +36,20 @@ import { personalInfo } from "./data";
 import AmbientBackground from "./components/AmbientBackground";
 import ScrollParticles from "./components/ScrollParticles";
 import NeuralCanvas from "./components/NeuralCanvas";
-import ResearchSandbox from "./components/ResearchSandbox";
-import PublicationsList from "./components/PublicationsList";
-import AcademicTimeline from "./components/AcademicTimeline";
-import EducationSpiral from "./components/EducationSpiral";
-import GenerativeArt from "./components/GenerativeArt";
-import { TechnicalSkills } from "./components/TechnicalSkills";
+import { lazy, Suspense } from "react";
+const ResearchSandbox = lazy(() => import("./components/ResearchSandbox"));
+const PublicationsList = lazy(() => import("./components/PublicationsList"));
+const AcademicTimeline = lazy(() => import("./components/AcademicTimeline"));
+const EducationSpiral = lazy(() => import("./components/EducationSpiral"));
+const GenerativeArt = lazy(() => import("./components/GenerativeArt"));
+const TechnicalSkills = lazy(() => import("./components/TechnicalSkills").then(m => ({ default: m.TechnicalSkills })));
+
+
+
+
+
+
+
 import MagneticCursor from "./components/MagneticCursor";
 import Loader from "./components/Loader";
 import trustImg from "./assets/images/computational_trust_magazine_1783364483351.jpg";
@@ -679,7 +687,9 @@ export default function App() {
             </h2>
           </div>
 
-          <PublicationsList theme={theme} />
+          <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading PublicationsList...</div></div>}>
+            <PublicationsList theme={theme} />
+          </Suspense>
         </div>
       </motion.section>
 
@@ -693,7 +703,9 @@ export default function App() {
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <EducationSpiral theme={theme} />
+        <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading EducationSpiral...</div></div>}>
+            <EducationSpiral theme={theme} />
+          </Suspense>
       </motion.section>
 
       <SectionDivider isDark={isDark} />
@@ -715,14 +727,18 @@ export default function App() {
             </h2>
           </div>
 
-          <AcademicTimeline theme={theme} />
+          <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading AcademicTimeline...</div></div>}>
+            <AcademicTimeline theme={theme} />
+          </Suspense>
         </div>
       </motion.section>
 
       <SectionDivider isDark={isDark} />
 
       {/* 7. TECHNICAL SKILLS SECTION */}
-      <TechnicalSkills isDark={isDark} />
+      <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading TechnicalSkills...</div></div>}>
+            <TechnicalSkills isDark={isDark} />
+          </Suspense>
 
       <SectionDivider isDark={isDark} />
 
@@ -746,7 +762,9 @@ export default function App() {
             </p>
           </div>
 
-          <GenerativeArt theme={theme} />
+          <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading GenerativeArt...</div></div>}>
+            <GenerativeArt theme={theme} />
+          </Suspense>
         </div>
       </motion.section>
 
