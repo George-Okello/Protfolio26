@@ -29,6 +29,8 @@ import {
   X,
   Github,
   ArrowUp,
+  Volume2,
+  VolumeX,
   Copy
 } from "lucide-react";
 
@@ -117,6 +119,63 @@ export default function App() {
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  
+  // Audio refs
+  const audioCtxRef = React.useRef<AudioContext | null>(null);
+  const noiseNodeRef = React.useRef<AudioBufferSourceNode | null>(null);
+  const gainNodeRef = React.useRef<GainNode | null>(null);
+
+  const toggleAudio = () => {
+    if (isAudioPlaying) {
+      if (noiseNodeRef.current) {
+        noiseNodeRef.current.stop();
+        noiseNodeRef.current.disconnect();
+      }
+      if (audioCtxRef.current) {
+        audioCtxRef.current.suspend();
+      }
+      setIsAudioPlaying(false);
+    } else {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const bufferSize = ctx.sampleRate * 2; // 2 seconds of buffer
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      // Generate brown noise
+      let lastOut = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = data[i];
+        data[i] *= 3.5; // (roughly) compensate for gain
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const gain = ctx.createGain();
+      gain.gain.value = 0.05; // Soft volume
+
+      noise.connect(gain);
+      gain.connect(ctx.destination);
+
+      noise.start();
+      noiseNodeRef.current = noise;
+      gainNodeRef.current = gain;
+
+      setIsAudioPlaying(true);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -259,6 +318,15 @@ export default function App() {
 
           {/* Action buttons (Theme and Contact) */}
           <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.25em] font-medium">
+            {/* Audio Toggle */}
+            <button
+              onClick={toggleAudio}
+              className={`hover:opacity-70 transition-opacity p-1.5 rounded-full ${isAudioPlaying ? (isDark ? 'bg-white/10' : 'bg-black/5') : ''}`}
+              title="Toggle Ambient Noise"
+            >
+              {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5 opacity-50" />}
+            </button>
+
             {/* Theme toggler */}
             <button
               onClick={toggleTheme}

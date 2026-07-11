@@ -15,18 +15,38 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
   const [eegTask, setEegTask] = useState<"resting" | "nback" | "switching" | "interpretable">("resting");
   const [modelType, setModelType] = useState<"CNN" | "LSTM" | "Transformer">("Transformer");
   const [confidence, setConfidence] = useState(0.85);
+  const [stimulusActive, setStimulusActive] = useState(false);
+
+  const handleStimulus = () => {
+    if (eegTask === "resting") return;
+    setStimulusActive(true);
+    setConfidence(prev => Math.min(0.99, prev + 0.15));
+    setTimeout(() => setStimulusActive(false), 800);
+  };
 
   // State for Widget 2: Bilingual Dynamics
   const [inputText, setInputText] = useState("Currently engaged in machine learning research.");
   const [saccCost, setSaccCost] = useState(0.12);
   const [switchTrajectory, setSwitchTrajectory] = useState<number[]>(Array(15).fill(0.1));
 
+  const injectCodeSwitch = () => {
+    const injections = [" y colaborando", " con profesores", " en proyectos", " de inteligencia artificial", " el modelo de redes"];
+    const randomInjection = injections[Math.floor(Math.random() * injections.length)];
+    setInputText(prev => prev + randomInjection);
+  };
+
   // State for Widget 3: Multi-Agent Trust Playground
   const [noisyObservations, setNoisyObservations] = useState(true);
   const [agentArchitecture, setAgentArchitecture] = useState<"Standard DQN" | "LSTM-DQN">("LSTM-DQN");
   const [coordinationRate, setCoordinationRate] = useState(85);
   const [trustLevel, setTrustLevel] = useState(78);
-  const [agentStatus, setAgentStatus] = useState<"Searching" | "Coordinating" | "Converged">("Coordinating");
+  const [agentStatus, setAgentStatus] = useState<"Searching" | "Coordinating" | "Converged" | "Desynchronized">("Coordinating");
+  const [networkOutage, setNetworkOutage] = useState(false);
+
+  const triggerNetworkOutage = () => {
+    setNetworkOutage(true);
+    setTimeout(() => setNetworkOutage(false), 2000);
+  };
 
   // State for Widget 4: Cognitive Biases
   const [activeBias, setActiveBias] = useState<"Normal" | "Loss-Averse" | "Anchoring" | "Confirmation" | "Optimistic">("Loss-Averse");
@@ -34,6 +54,12 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
   const [winRate, setWinRate] = useState(85);
   const [explorationRate, setExplorationRate] = useState(30);
   const [biasStatus, setBiasStatus] = useState("Converging");
+  const [feedbackActive, setFeedbackActive] = useState(false);
+
+  const triggerFeedback = () => {
+    setFeedbackActive(true);
+    setTimeout(() => setFeedbackActive(false), 1500);
+  };
 
   // Handle active task propagation to parent canvas background
   useEffect(() => {
@@ -93,6 +119,13 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
     let interval: NodeJS.Timeout;
     
     const runSimulation = () => {
+      if (networkOutage) {
+        setCoordinationRate(Math.floor(Math.random() * 15));
+        setTrustLevel(Math.max(0, trustLevel - 20));
+        setAgentStatus("Desynchronized");
+        return;
+      }
+
       let baseCoord = 45;
       let baseTrust = 30;
 
@@ -105,8 +138,8 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
         baseTrust = noisyObservations ? 19 : 58;
       }
 
-      setCoordinationRate(Math.min(100, Math.max(5, baseCoord + Math.floor((Math.random() - 0.5) * 8))));
-      setTrustLevel(Math.min(100, Math.max(5, baseTrust + Math.floor((Math.random() - 0.5) * 6))));
+      setCoordinationRate(prev => Math.min(100, Math.max(5, baseCoord + Math.floor((Math.random() - 0.5) * 8))));
+      setTrustLevel(prev => Math.min(100, Math.max(5, baseTrust + Math.floor((Math.random() - 0.5) * 6))));
 
       // Map status
       if (baseCoord > 80) setAgentStatus("Converged");
@@ -115,10 +148,10 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
     };
 
     runSimulation();
-    interval = setInterval(runSimulation, 2500);
+    interval = setInterval(runSimulation, 1500);
 
     return () => clearInterval(interval);
-  }, [noisyObservations, agentArchitecture]);
+  }, [noisyObservations, agentArchitecture, networkOutage, trustLevel]);
 
   // Widget 4: Cognitive Biases simulation
   useEffect(() => {
@@ -134,16 +167,22 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
       else if (activeBias === "Confirmation") { winR = 40; expR = 10; status = "Failed to Learn"; }
       else if (activeBias === "Optimistic") { winR = 90; expR = 80; status = "High Exploration"; }
 
+      if (feedbackActive) {
+        if (activeBias === "Normal" || activeBias === "Optimistic") expR = 95; // highly responsive
+        else if (activeBias === "Confirmation") { winR -= 10; status = "Rejecting Feedback"; } // stubborn
+        else if (activeBias === "Anchoring") { expR += 5; } // barely reacts
+      }
+
       setWinRate(Math.min(100, Math.max(0, winR + Math.floor((Math.random() - 0.5) * 5))));
       setExplorationRate(Math.min(100, Math.max(0, expR + Math.floor((Math.random() - 0.5) * 5))));
       setBiasStatus(status);
     };
 
     runSimulation();
-    interval = setInterval(runSimulation, 2500);
+    interval = setInterval(runSimulation, 1500);
 
     return () => clearInterval(interval);
-  }, [activeBias]);
+  }, [activeBias, feedbackActive]);
 
   const selectSampleText = (text: string) => {
     setInputText(text);
@@ -160,9 +199,21 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className={`px-2.5 py-0.5 text-xs font-mono rounded-full ${
-              isDark ? "bg-amber-500/10 text-amber-400" : "bg-amber-500/10 text-amber-700"
+            <span className={`flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-mono rounded-full ${
+              activeTab === "eeg" ? (isDark ? "bg-orange-500/10 text-orange-400" : "bg-orange-500/10 text-orange-700") :
+              activeTab === "bilingual" ? (isDark ? "bg-blue-500/10 text-blue-400" : "bg-blue-500/10 text-blue-700") :
+              activeTab === "marl" ? (isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-500/10 text-emerald-700") :
+              (isDark ? "bg-violet-500/10 text-violet-400" : "bg-violet-500/10 text-violet-700")
             }`}>
+              <motion.span 
+                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className={`w-2 h-2 rounded-full ${
+                activeTab === "eeg" ? "bg-orange-500" :
+                activeTab === "bilingual" ? "bg-blue-500" :
+                activeTab === "marl" ? "bg-emerald-500" :
+                "bg-violet-500"
+              }`} />
               Interactive Lab
             </span>
             <span className="text-xs font-mono text-slate-400">SEED-VIG & sACC Simulators</span>
@@ -324,37 +375,90 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                   <div className="flex flex-col md:flex-row items-center gap-6 py-4">
                     <div className="w-full md:w-1/2 flex justify-center relative">
                       {/* SVG Stylized Brain Top View */}
-                      <svg viewBox="0 0 120 120" className="w-40 h-40 opacity-80">
-                        {/* Outlines */}
-                        <path
-                          d="M 60,10 C 25,10 15,35 15,60 C 15,85 28,110 60,110 C 92,110 105,85 105,60 C 105,35 95,10 60,10 Z"
-                          fill="none"
-                          stroke={isDark ? "rgba(255,255,255,0.15)" : "rgba(15,23,42,0.12)"}
-                          strokeWidth="2"
-                        />
-                        <path
-                          d="M 60,10 C 60,10 50,45 60,60 C 70,75 60,110 60,110"
-                          fill="none"
-                          stroke={isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.06)"}
-                          strokeWidth="1.5"
-                          strokeDasharray="4 4"
-                        />
-                        {/* Active EEG Nodes (Frontal, Parietal, Occipital, Temporal) */}
-                        <circle cx="60" cy="22" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
-                        <circle cx="40" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
-                        <circle cx="80" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
-                        <circle cx="35" cy="75" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
-                        <circle cx="85" cy="75" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
-                        <circle cx="60" cy="95" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} className="transition-all" />
+                      <svg viewBox="0 0 120 120" className="w-40 h-40 opacity-80" style={{ transform: "scale(1.15)" }}>
+                        <g stroke={isDark ? "rgba(255,255,255,0.2)" : "rgba(15,23,42,0.25)"} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          {/* Brain outline */}
+                          <path d="M 60,8 C 45,5 25,12 18,30 C 10,48 10,70 20,88 C 30,105 45,112 60,110 C 75,112 90,105 100,88 C 110,70 110,48 102,30 C 95,12 75,5 60,8 Z" fill={isDark ? "rgba(15,23,42,0.4)" : "rgba(248,250,252,0.8)"} />
+                          
+                          {/* Central longitudinal fissure */}
+                          <path d="M 60,8 Q 58,15 60,25 Q 62,35 60,45 Q 58,55 60,65 Q 62,75 60,85 Q 58,95 60,110" />
+
+                          {/* Sulci/Gyri lines left */}
+                          <path d="M 18,30 C 25,25 35,35 45,25" />
+                          <path d="M 12,45 C 20,40 30,55 45,45" />
+                          <path d="M 11,60 C 25,60 25,75 40,65" />
+                          <path d="M 15,75 C 25,80 30,70 45,80" />
+                          <path d="M 23,92 C 30,90 35,100 45,95" />
+                          <path d="M 30,15 C 35,25 45,15 55,20" />
+                          <path d="M 35,40 C 45,45 50,35 55,50" />
+                          <path d="M 30,65 C 40,55 50,65 55,60" />
+                          <path d="M 35,85 C 45,85 50,95 55,85" />
+
+                          {/* Sulci/Gyri lines right */}
+                          <path d="M 102,30 C 95,25 85,35 75,25" />
+                          <path d="M 108,45 C 100,40 90,55 75,45" />
+                          <path d="M 109,60 C 95,60 95,75 80,65" />
+                          <path d="M 105,75 C 95,80 90,70 75,80" />
+                          <path d="M 97,92 C 90,90 85,100 75,95" />
+                          <path d="M 90,15 C 85,25 75,15 65,20" />
+                          <path d="M 85,40 C 75,45 70,35 65,50" />
+                          <path d="M 90,65 C 80,55 70,65 65,60" />
+                          <path d="M 85,85 C 75,85 70,95 65,85" />
+                        </g>
+
+                        {/* Chip / Circuit Board Overlaid on bottom half */}
+                        <g transform="translate(0, 5)">
+                          <rect x="40" y="60" width="40" height="40" rx="4" fill={isDark ? "#0f172a" : "#ffffff"} stroke={isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.9)"} strokeWidth="1.5" />
+                          {/* Chip core */}
+                          <rect x="52" y="72" width="16" height="16" rx="2" fill={isDark ? "#334155" : "#1e293b"} />
+                          
+                          {/* circuit lines connecting to brain */}
+                          <g stroke={isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.6)"} strokeWidth="1" fill="none">
+                            <path d="M 40,65 L 30,65 L 25,60" />
+                            <path d="M 40,75 L 30,75 L 20,80" />
+                            <path d="M 40,85 L 25,85 L 20,95" />
+
+                            <path d="M 80,65 L 90,65 L 95,60" />
+                            <path d="M 80,75 L 90,75 L 100,80" />
+                            <path d="M 80,85 L 95,85 L 100,95" />
+
+                            <path d="M 50,60 L 50,45 L 45,40" />
+                            <path d="M 60,60 L 60,45 L 60,35" />
+                            <path d="M 70,60 L 70,45 L 75,40" />
+
+                            <path d="M 50,100 L 50,105 L 45,108" />
+                            <path d="M 60,100 L 60,108" />
+                            <path d="M 70,100 L 70,105 L 75,108" />
+                          </g>
+
+                          {/* circuit lines on board */}
+                          <g stroke={isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"} strokeWidth="1" fill="none">
+                            <path d="M 45,64 L 50,64 L 50,72 M 45,96 L 50,96 L 50,88 M 75,64 L 70,64 L 70,72 M 75,96 L 70,96 L 70,88" />
+                            <circle cx="45" cy="64" r="1" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)"} />
+                            <circle cx="45" cy="96" r="1" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)"} />
+                            <circle cx="75" cy="64" r="1" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)"} />
+                            <circle cx="75" cy="96" r="1" fill={isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)"} />
+                          </g>
+                        </g>
+
+                        {/* Active Nodes on Brain */}
+                        <motion.circle cx="60" cy="22" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="35" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="85" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="25" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="95" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="60" cy="80" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
                         
                         {/* Connection curves depending on task */}
                         {eegTask !== "resting" && (
-                          <path
-                            d={eegTask === "nback" ? "M 60,22 Q 60,60 60,95" : "M 40,45 Q 60,60 80,45"}
+                          <motion.path
+                            d={eegTask === "nback" ? "M 60,22 Q 60,50 60,80" : eegTask === "switching" ? "M 35,45 Q 60,60 85,45" : "M 25,70 Q 60,50 95,70"}
                             fill="none"
-                            stroke="rgba(249, 115, 22, 0.5)"
-                            strokeWidth="1.5"
-                            className="animate-pulse"
+                            stroke={eegTask === "nback" ? "rgba(249, 115, 22, 0.8)" : "rgba(245, 158, 11, 0.8)"}
+                            strokeWidth={stimulusActive ? "4" : "2"}
+                            strokeDasharray="4 8"
+                            animate={{ strokeDashoffset: [24, 0] }}
+                            transition={{ duration: stimulusActive ? 0.3 : 0.8, repeat: Infinity, ease: "linear" }}
                           />
                         )}
                       </svg>
@@ -401,6 +505,20 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                           </div>
                         </div>
                       </div>
+
+                      <button 
+                        onClick={handleStimulus}
+                        disabled={eegTask === "resting" || stimulusActive}
+                        className={`w-full py-2.5 mt-2 rounded-xl text-xs font-mono font-medium transition-all ${
+                          eegTask === "resting" 
+                            ? "opacity-50 cursor-not-allowed bg-slate-800/50 text-slate-500" 
+                            : stimulusActive 
+                              ? "bg-amber-500 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.5)]" 
+                              : isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-200" : "bg-slate-200 hover:bg-slate-300 text-slate-800"
+                        }`}
+                      >
+                        {stimulusActive ? ">>> SIGNAL BURST ACTIVE <<<" : "TRIGGER COGNITIVE STIMULUS"}
+                      </button>
                     </div>
                   </div>
 
@@ -436,13 +554,36 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                   <textarea
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    className={`w-full h-24 p-3 text-xs font-sans rounded-xl border focus:outline-none focus:ring-1 focus:ring-amber-500/50 ${
+                    className={`w-full h-20 p-3 text-xs font-sans rounded-xl border focus:outline-none focus:ring-1 focus:ring-amber-500/50 ${
                       isDark 
                         ? "bg-slate-950 border-slate-800 text-slate-200" 
                         : "bg-slate-50 border-slate-200 text-slate-800"
                     }`}
                     placeholder="Type sentence here..."
                   />
+                  <div className={`mt-2 p-3 min-h-[3rem] rounded-xl border ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"}`}>
+                    <div className="text-[9px] font-mono text-slate-400 mb-1.5 uppercase flex justify-between items-center">
+                      <span>Live Lexical Parser</span>
+                      <button 
+                        onClick={injectCodeSwitch}
+                        className={`px-2 py-0.5 rounded text-[8px] transition-colors ${isDark ? "bg-slate-800 hover:bg-slate-700 text-amber-400" : "bg-slate-100 hover:bg-slate-200 text-orange-600"}`}
+                      >
+                        + INJECT CODE-SWITCH
+                      </button>
+                    </div>
+                    <div className="text-xs font-sans flex flex-wrap gap-x-1 gap-y-1.5">
+                      {inputText.split(/([\s,.]+)/).map((word, i) => {
+                        const SPANISH_WORDS = ["y", "colaborando", "con", "profesores", "en", "proyectos", "avanzados", "el", "la", "de", "inteligencia", "artificial", "que", "es", "modelo", "redes"];
+                        const isSpanish = SPANISH_WORDS.includes(word.toLowerCase().trim());
+                        if (word.trim() === "") return <span key={i} className="whitespace-pre">{word}</span>;
+                        return (
+                          <span key={i} className={`px-1 rounded transition-colors duration-300 ${isSpanish ? (isDark ? "bg-amber-500/20 text-amber-400" : "bg-orange-500/20 text-orange-700 font-medium") : (isDark ? "text-slate-300" : "text-slate-600")}`}>
+                            {word}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -503,20 +644,20 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
 
                     <svg viewBox="0 0 300 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
                       {/* Plot path */}
-                      <path
-                        d={`M ${switchTrajectory.map((val, idx) => `${(idx * 300) / 14},${100 - val * 90}`).join(" L ")}`}
+                      <motion.path
+                        animate={{ d: `M ${switchTrajectory.map((val, idx) => `${(idx * 300) / 14},${100 - val * 90}`).join(" L ")}` }}
+                        transition={{ type: "spring", stiffness: 40, damping: 15 }}
                         fill="none"
                         stroke={isDark ? "rgb(245, 158, 11)" : "rgb(249, 115, 22)"}
                         strokeWidth="2.5"
-                        className="transition-all duration-300"
                       />
                       {/* Dots on points */}
                       {switchTrajectory.map((val, idx) => (
-                        <circle
+                        <motion.circle
                           key={idx}
-                          cx={(idx * 300) / 14}
-                          cy={100 - val * 90}
-                          r="3"
+                          animate={{ cx: (idx * 300) / 14, cy: 100 - val * 90 }}
+                          transition={{ type: "spring", stiffness: 40, damping: 15 }}
+                          r="4"
                           fill={isDark ? "rgb(251, 146, 60)" : "rgb(249, 115, 22)"}
                         />
                       ))}
@@ -597,6 +738,18 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                       </button>
                     </div>
 
+                    <button
+                      onClick={triggerNetworkOutage}
+                      disabled={networkOutage}
+                      className={`w-full py-2 rounded-xl text-[10px] font-mono font-medium transition-all ${
+                        networkOutage 
+                          ? "bg-rose-500 text-white shadow-[0_0_15px_rgba(243,24,96,0.5)]" 
+                          : isDark ? "bg-slate-800 hover:bg-slate-700 text-rose-400" : "bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200"
+                      }`}
+                    >
+                      {networkOutage ? "!!! SEVERE NETWORK OUTAGE !!!" : "SIMULATE NETWORK OUTAGE SPIKE"}
+                    </button>
+
                     <div>
                       <span className="text-[10px] font-mono text-slate-400 uppercase block mb-2">AGENT ARCHITECTURE</span>
                       <div className="grid grid-cols-2 gap-2">
@@ -657,33 +810,36 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                       {/* Render 3 moving agents with CSS animations representing Reinforcement Learning agents */}
                       <motion.div
                         animate={{
-                          x: agentStatus === "Converged" ? [40, 60, 50, 40] : [20, 110, 50, 20],
-                          y: agentStatus === "Converged" ? [30, 40, 35, 30] : [10, 70, 30, 10]
+                          x: agentStatus === "Desynchronized" ? [20, -10, 80, -20] : agentStatus === "Converged" ? [40, 60, 50, 40] : [20, 110, 50, 20],
+                          y: agentStatus === "Desynchronized" ? [10, 150, -50, 40] : agentStatus === "Converged" ? [30, 40, 35, 30] : [10, 70, 30, 10],
+                          scale: agentStatus === "Desynchronized" ? [1, 0.5, 1.5, 1] : 1
                         }}
-                        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                        className="absolute w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center shadow-xs"
+                        transition={{ repeat: Infinity, duration: agentStatus === "Desynchronized" ? 1 : 6, ease: "easeInOut" }}
+                        className={`absolute w-4 h-4 rounded-full flex items-center justify-center shadow-xs ${agentStatus === "Desynchronized" ? "bg-rose-500" : "bg-orange-500"}`}
                       >
                         <span className="text-[7px] text-white font-mono">A1</span>
                       </motion.div>
 
                       <motion.div
                         animate={{
-                          x: agentStatus === "Converged" ? [180, 160, 170, 180] : [240, 150, 200, 240],
-                          y: agentStatus === "Converged" ? [35, 45, 40, 35] : [20, 80, 50, 20]
+                          x: agentStatus === "Desynchronized" ? [240, 300, 100, 350] : agentStatus === "Converged" ? [180, 160, 170, 180] : [240, 150, 200, 240],
+                          y: agentStatus === "Desynchronized" ? [20, -80, 160, -20] : agentStatus === "Converged" ? [35, 45, 40, 35] : [20, 80, 50, 20],
+                          scale: agentStatus === "Desynchronized" ? [1, 1.5, 0.5, 1] : 1
                         }}
-                        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                        className="absolute w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center shadow-xs"
+                        transition={{ repeat: Infinity, duration: agentStatus === "Desynchronized" ? 0.8 : 5, ease: "easeInOut" }}
+                        className={`absolute w-4 h-4 rounded-full flex items-center justify-center shadow-xs ${agentStatus === "Desynchronized" ? "bg-rose-500" : "bg-amber-500"}`}
                       >
                         <span className="text-[7px] text-white font-mono">A2</span>
                       </motion.div>
 
                       <motion.div
                         animate={{
-                          x: agentStatus === "Converged" ? [110, 115, 108, 110] : [120, 60, 180, 120],
-                          y: agentStatus === "Converged" ? [80, 90, 85, 80] : [90, 30, 40, 90]
+                          x: agentStatus === "Desynchronized" ? [120, 10, 250, 120] : agentStatus === "Converged" ? [110, 115, 108, 110] : [120, 60, 180, 120],
+                          y: agentStatus === "Desynchronized" ? [90, 180, -30, 90] : agentStatus === "Converged" ? [80, 90, 85, 80] : [90, 30, 40, 90],
+                          scale: agentStatus === "Desynchronized" ? [1.5, 0.5, 1, 1] : 1
                         }}
-                        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-                        className="absolute w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center shadow-xs"
+                        transition={{ repeat: Infinity, duration: agentStatus === "Desynchronized" ? 1.2 : 7, ease: "easeInOut" }}
+                        className={`absolute w-4 h-4 rounded-full flex items-center justify-center shadow-xs ${agentStatus === "Desynchronized" ? "bg-rose-500" : "bg-yellow-500"}`}
                       >
                         <span className="text-[7px] text-white font-mono">A3</span>
                       </motion.div>
@@ -747,7 +903,7 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                   <div className="space-y-4">
                     <div>
                       <span className="text-[10px] font-mono text-slate-400 uppercase block mb-2">SELECT AGENT BIAS PROFILE</span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                         {[
                           { id: "Normal", desc: "Standard Epsilon-Greedy", detail: "A standard agent that balances exploration and exploitation without subjective weightings." },
                           { id: "Loss-Averse", desc: "Penalizes losses heavily", detail: "Inspired by Prospect Theory. Weighs failures (0) more negatively than successes (1)." },
@@ -798,6 +954,18 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                           </div>
                         ))}
                       </div>
+                      
+                      <button
+                        onClick={triggerFeedback}
+                        disabled={feedbackActive}
+                        className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-medium transition-all ${
+                          feedbackActive 
+                            ? "bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" 
+                            : isDark ? "bg-slate-800 hover:bg-slate-700 text-blue-400" : "bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200"
+                        }`}
+                      >
+                        {feedbackActive ? ">> FEEDBACK INJECTED <<" : "INJECT ENVIRONMENTAL FEEDBACK SHOCK"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -828,7 +996,7 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                     isDark ? "bg-slate-950" : "bg-white border border-slate-100"
                   }`}>
                     {/* Visualizer bars for Win Rate & Exploration Rate */}
-                    <div className="w-full px-8 space-y-6">
+                    <div className="w-full px-8 space-y-6 z-10 relative">
                       <div>
                         <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-2">
                           <span>WIN RATE (REWARD EXPLOITATION)</span>
@@ -856,6 +1024,18 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                         </div>
                       </div>
                     </div>
+                    {/* Shock visualizer effect */}
+                    <AnimatePresence>
+                      {feedbackActive && (
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 0.5, 0] }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 1.5 }}
+                          className="absolute inset-0 bg-blue-500/20 pointer-events-none"
+                        />
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <p className="text-[11px] font-mono text-slate-400 leading-relaxed mt-4 pt-4 border-t border-slate-800/10">
