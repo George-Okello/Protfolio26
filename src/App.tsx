@@ -103,13 +103,13 @@ function SectionDivider({ isDark }: { isDark: boolean }) {
       className="w-full flex justify-center py-8"
       initial={{ opacity: 0, filter: "blur(5px)" }}
       whileInView={{ opacity: 1, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
       <motion.div 
         initial={{ scaleX: 0 }}
         whileInView={{ scaleX: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
         className={`h-px w-2/3 max-w-3xl ${isDark ? "bg-gradient-to-r from-transparent via-white/20 to-transparent" : "bg-gradient-to-r from-transparent via-black/20 to-transparent"}`} 
       />
@@ -161,6 +161,24 @@ export default function App() {
     }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    
+    const element = document.querySelector(href);
+    if (element) {
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -272,6 +290,7 @@ export default function App() {
               <a
                 key={link.label}
                 href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
                 className="hover:opacity-70 transition-opacity"
               >
                 {link.label}
@@ -336,7 +355,7 @@ export default function App() {
                     key={link.label}
                     href={link.href}
                     className="hover:opacity-60 transition-opacity block border-b border-current/10 pb-4"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => scrollToSection(e, link.href)}
                   >
                     {link.label}
                   </motion.a>
@@ -563,7 +582,7 @@ export default function App() {
         className="py-24 relative mt-12"
         initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="px-6 md:px-12 w-full">
@@ -660,7 +679,7 @@ export default function App() {
         className={`py-24 relative`}
         initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="px-6 md:px-12 w-full">
@@ -676,7 +695,7 @@ export default function App() {
         className={`py-24 relative`}
         initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="px-6 md:px-12 w-full space-y-12">
@@ -700,7 +719,7 @@ export default function App() {
         className={`relative`}
         initial={{ opacity: 0, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <Suspense fallback={<div className="w-full h-32 flex items-center justify-center opacity-50"><div className="animate-pulse">Loading EducationSpiral...</div></div>}>
@@ -716,7 +735,7 @@ export default function App() {
         className={`py-24 relative`}
         initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="px-6 md:px-12 w-full space-y-12">
@@ -748,7 +767,7 @@ export default function App() {
         className={`py-24 relative`}
         initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="px-6 md:px-12 w-full space-y-12">
