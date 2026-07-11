@@ -9,6 +9,25 @@ interface AcademicTimelineProps {
 
 type FilterType = "all" | "research" | "industry" | "service";
 
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }
+  }
+};
+
 export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
   const isDark = theme === "dark";
   const [filter, setFilter] = useState<FilterType>("all");
@@ -82,11 +101,8 @@ export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
         <motion.div
           key={key}
           layout
-          initial={{ opacity: 0, y: 40, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
+          variants={itemVariants}
           exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-          transition={{ duration: 0.6, delay: index * 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
           className={`relative p-6 md:p-8 border flex flex-col justify-between ${spanClass} ${
             isDark 
               ? "border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 backdrop-blur-md" 
@@ -150,11 +166,8 @@ export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
       <motion.div
         key={key}
         layout
-        initial={{ opacity: 0, y: 40, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, margin: "-50px" }}
+        variants={itemVariants}
         exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-        transition={{ duration: 0.6, delay: index * 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
         className={`p-6 md:p-8 border flex flex-col ${spanClass} ${
           isDark 
             ? "border-white/10 hover:border-white/30 bg-[#1A1A1A] hover:bg-[#222]" 
@@ -255,13 +268,19 @@ export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
               </div>
               
               {/* Cards Grid */}
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-auto">
+              <motion.div 
+                className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-auto"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+              >
                 <AnimatePresence mode="popLayout">
                   {group.items.map((item, idx) => 
                     renderCard(item, idx, group.items.length, item.id)
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
         </AnimatePresence>

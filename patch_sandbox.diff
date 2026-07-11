@@ -1,0 +1,10 @@
+--- src/components/ResearchSandbox.tsx
++++ src/components/ResearchSandbox.tsx
+@@ -279,6 +279,7 @@
+             <Sparkles className="w-3.5 h-3.5" />
+             RL Biases
+           </button>
++          <div className="w-4 shrink-0 xl:hidden" />
+         </div>
+       </div>
+ 

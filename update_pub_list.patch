@@ -1,0 +1,104 @@
+--- src/components/PublicationsList.tsx
++++ src/components/PublicationsList.tsx
+@@ -21,6 +21,18 @@
+   return Math.max(1, Math.ceil(wordCount / 200));
+ }
+ 
++const containerVariants = {
++  hidden: {},
++  visible: {
++    transition: { staggerChildren: 0.15 }
++  }
++};
++
++const itemVariants = {
++  hidden: { opacity: 0, y: 20 },
++  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
++};
++
+ function PublicationCard({ pub, isExpanded, toggleExpand, isDark, index }: { pub: Publication, isExpanded: boolean, toggleExpand: () => void, isDark: boolean, index: number, key?: string }) {
+   const paperTypeLabel = pub.type === "Conference" ? "Conference Paper" : "Research Paper";
+   const readingTime = calculateReadingTime(pub.summary || pub.title);
+@@ -28,10 +40,7 @@
+   return (
+     <motion.div 
+-      initial={{ opacity: 0, y: 20 }}
+-      whileInView={{ opacity: 1, y: 0 }}
+-      viewport={{ once: true, margin: "-50px" }}
+-      transition={{ duration: 0.4, delay: index * 0.1 }}
++      variants={itemVariants}
+       style={{ perspective: "1000px" }}
+     >
+       <div 
+@@ -147,7 +156,12 @@
+                 <h4 className="text-[10px] uppercase tracking-widest mb-3 opacity-50 italic">
+                   Conference Papers
+                 </h4>
+-                <div className="grid grid-cols-1 gap-4">
++                <motion.div 
++                  className="grid grid-cols-1 gap-4"
++                  variants={containerVariants}
++                  initial="hidden"
++                  whileInView="visible"
++                  viewport={{ once: true, margin: "-50px" }}
++                >
+                   {publications.filter(p => p.type === "Conference").map((pub, idx) => (
+                     <PublicationCard 
+@@ -158,7 +172,7 @@
+                     />
+                   ))}
+-                </div>
++                </motion.div>
+               </div>
+             )}
+ 
+@@ -167,7 +181,12 @@
+                 <h4 className="text-[10px] uppercase tracking-widest mb-3 opacity-50 italic">
+                   Academic Publications & Preprints
+                 </h4>
+                 
+-                <div className="grid grid-cols-1 gap-4">
++                <motion.div 
++                  className="grid grid-cols-1 gap-4"
++                  variants={containerVariants}
++                  initial="hidden"
++                  whileInView="visible"
++                  viewport={{ once: true, margin: "-50px" }}
++                >
+                   {publications.filter(p => p.type !== "Conference").map((pub, idx) => (
+                     <PublicationCard 
+@@ -178,7 +197,7 @@
+                     />
+                   ))}
+-                </div>
++                </motion.div>
+               </div>
+             </div>
+@@ -213,11 +232,14 @@
+             )}
+ 
+-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
++            <motion.div 
++              className="grid grid-cols-1 md:grid-cols-2 gap-6"
++              variants={containerVariants}
++              initial="hidden"
++              whileInView="visible"
++              viewport={{ once: true, margin: "-50px" }}
++            >
+               {filteredProjects.map((p, idx) => (
+                 <motion.div 
+                   key={p.id}
+-                  initial={{ opacity: 0, y: 20 }}
+-                  whileInView={{ opacity: 1, y: 0 }}
+-                  viewport={{ once: true, margin: "-50px" }}
+-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
++                  variants={itemVariants}
+                   style={{ perspective: "1000px" }}
+                 >
+@@ -279,7 +301,7 @@
+                 </motion.div>
+               ))}
+-            </div>
++            </motion.div>
+           </div>
+         )}

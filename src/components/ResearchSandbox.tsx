@@ -196,7 +196,7 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
     }`} id="research-interactive-sandbox">
       
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className={`flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-mono rounded-full ${
@@ -206,6 +206,7 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
               (isDark ? "bg-violet-500/10 text-violet-400" : "bg-violet-500/10 text-violet-700")
             }`}>
               <motion.span 
+                initial={{ opacity: 0.3, scale: 0.8 }}
                 animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 className={`w-2 h-2 rounded-full ${
@@ -229,7 +230,7 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
         </div>
 
         {/* Tab Controls */}
-        <div className={`flex overflow-x-auto hide-scrollbar shrink-0 p-1 rounded-xl ${isDark ? "bg-slate-950 border border-slate-800" : "bg-slate-100 border border-slate-200"}`}>
+        <div className={`flex w-full xl:w-auto overflow-x-auto hide-scrollbar shrink-0 p-1 rounded-xl ${isDark ? "bg-slate-950 border border-slate-800" : "bg-slate-100 border border-slate-200"}`}>
           <button
             onClick={() => setActiveTab("eeg")}
             className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
@@ -442,12 +443,12 @@ export default function ResearchSandbox({ theme, onTaskChange }: ResearchSandbox
                         </g>
 
                         {/* Active Nodes on Brain */}
-                        <motion.circle cx="60" cy="22" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
-                        <motion.circle cx="35" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
-                        <motion.circle cx="85" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
-                        <motion.circle cx="25" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
-                        <motion.circle cx="95" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
-                        <motion.circle cx="60" cy="80" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="60" cy="22" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="35" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="85" cy="45" r="5" fill={eegTask === "switching" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "switching" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="25" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="95" cy="70" r="5" fill={eegTask === "interpretable" ? "rgb(245, 158, 11)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "interpretable" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
+                        <motion.circle cx="60" cy="80" r="5" fill={eegTask === "nback" ? "rgb(249, 115, 22)" : "rgba(156, 163, 175, 0.4)"} initial={{ opacity: 1, scale: 1 }} animate={eegTask === "nback" ? { scale: stimulusActive ? 1.8 : [1, 1.3, 1], opacity: [1, 0.8, 1] } : { scale: 1, opacity: 1 }} transition={{ duration: stimulusActive ? 0.2 : 1.5, repeat: stimulusActive ? 0 : Infinity }} />
                         
                         {/* Connection curves depending on task */}
                         {eegTask !== "resting" && (
