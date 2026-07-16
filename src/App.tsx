@@ -363,7 +363,7 @@ export default function App() {
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-10 text-[10px] uppercase tracking-[0.25em] font-medium">
+            <nav className="hidden lg:flex items-center gap-10 text-[10px] uppercase tracking-[0.25em] font-medium">
               {[
                 { label: "About", href: "#about" },
                 { label: "Lab Sandbox", href: "#sandbox" },
@@ -392,14 +392,14 @@ export default function App() {
               {/* Quick Contact Link */}
               <a
                 href="mailto:georgeokelloouma@gmail.com"
-                className="hidden md:block hover:opacity-70 transition-opacity uppercase"
+                className="hidden lg:block hover:opacity-70 transition-opacity uppercase"
                 id="navbar-contact-btn"
               >
                 Contact
               </a>
 
               <button
-                className="md:hidden hover:opacity-70 transition-opacity"
+                className="lg:hidden hover:opacity-70 transition-opacity"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? (
@@ -424,7 +424,7 @@ export default function App() {
                 duration: 0.4,
                 ease: [0.25, 1, 0.5, 1],
               }}
-              className={`md:hidden fixed inset-0 z-40 flex flex-col pt-32 px-6 sm:px-8 ${
+              className={`lg:hidden fixed inset-0 z-40 flex flex-col pt-32 px-6 sm:px-8 ${
                 isDark ? "bg-[#0B0F19]" : "bg-[#FAFAF9]"
               }`}
             >
@@ -791,7 +791,7 @@ export default function App() {
 
                   {/* Mobile Creative Marquee */}
                   <div 
-                    className="md:hidden relative overflow-hidden flex flex-col gap-3 -mx-6 px-6 w-[calc(100%+3rem)]" 
+                    className="lg:hidden relative overflow-hidden flex flex-col gap-3 -mx-6 px-6 w-[calc(100%+3rem)]" 
                     style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}
                   >
                     <motion.div
@@ -833,7 +833,7 @@ export default function App() {
                   </div>
 
                   {/* Desktop Standard Wrap */}
-                  <div className="hidden md:flex flex-wrap gap-3">
+                  <div className="hidden lg:flex flex-wrap gap-3">
                     {personalInfo.researchInterests.map((interest, idx) => (
                       <motion.span
                         key={idx}

@@ -158,7 +158,7 @@ export function TechnicalSkills({ isDark }: { isDark: boolean }) {
         </div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+          className="flex lg:grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 overflow-x-auto lg:overflow-x-visible pb-8 lg:pb-0 snap-x snap-mandatory hide-scrollbar -mx-6 px-6 lg:mx-0 lg:px-0 w-[calc(100%+3rem)] lg:w-full"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -169,7 +169,7 @@ export function TechnicalSkills({ isDark }: { isDark: boolean }) {
               key={idx}
               variants={itemVariants}
               style={{ transformStyle: "preserve-3d" }}
-              className={`p-6 border group hover:-translate-y-1 transition-all duration-300 ${
+              className={`min-w-[85vw] sm:min-w-[350px] lg:min-w-0 snap-center p-6 border group hover:-translate-y-1 transition-all duration-300 ${
                 isDark
                   ? "border-white/10 bg-[#1A1A1A] hover:border-white/30 hover:bg-[#222]"
                   : "border-slate-200 border-b-[3px] border-b-slate-300/70 hover:border-b-slate-400 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.1)]"
