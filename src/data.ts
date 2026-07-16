@@ -404,7 +404,7 @@ export const educations: Education[] = [
     id: "edu-strath-bbit",
     degree: "Bachelor of Business Information Technology",
     school: "Strathmore University",
-    location: "Machakos, Kenya",
+    location: "Nairobi, Kenya",
     period: "2020 - 2024",
     bullets: [
       "Double focus on Computer Science and Business Administration.",
