@@ -210,8 +210,8 @@ export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
       <motion.div
         key={key}
         layout
-        initial={{ opacity: 0, x: 60, scale: 0.95, filter: "saturate(0)" }}
-        whileInView={{ opacity: 1, x: 0, scale: 1, filter: "saturate(1)" }}
+        initial={{ opacity: 0, x: 60, scale: 0.95, filter: "saturate(0)", rotateY: 15 }}
+        whileInView={{ opacity: 1, x: 0, scale: 1, filter: "saturate(1)", rotateY: 0 }}
         viewport={{ once: false, amount: 0.2, margin: "-10%" }}
         exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
         transition={{
@@ -224,6 +224,7 @@ export default function AcademicTimeline({ theme }: AcademicTimelineProps) {
             ? "border-white/10 hover:border-white/30 bg-[#1A1A1A] hover:bg-[#222]"
             : "border-slate-200 border-b-[3px] border-b-slate-300/70 hover:border-b-slate-400 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.1)]"
         } transition-all duration-300 group`}
+        style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
       >
         <div className="flex flex-col mb-6">
           <div className="flex flex-wrap items-center gap-3 mb-4">

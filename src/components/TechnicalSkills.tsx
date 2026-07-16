@@ -115,7 +115,7 @@ export function TechnicalSkills({ isDark }: { isDark: boolean }) {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 40, filter: "blur(8px)", scale: 0.9 },
+    hidden: { opacity: 0, y: 40, filter: "blur(8px)", scale: 0.9, rotateX: -15 },
     visible: {
       opacity: 1,
       y: 0,
@@ -168,6 +168,7 @@ export function TechnicalSkills({ isDark }: { isDark: boolean }) {
             <motion.div
               key={idx}
               variants={itemVariants}
+              style={{ transformStyle: "preserve-3d" }}
               className={`p-6 border group hover:-translate-y-1 transition-all duration-300 ${
                 isDark
                   ? "border-white/10 bg-[#1A1A1A] hover:border-white/30 hover:bg-[#222]"

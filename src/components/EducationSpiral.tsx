@@ -79,6 +79,7 @@ export default function EducationSpiral({ theme }: EducationSpiralProps) {
                   rotateZ: 0,
                   scale: 1,
                   filter: "blur(0px)",
+                  rotateX: 0,
                 }}
                 viewport={{ once: false, amount: 0.2, margin: "-10%" }}
                 transition={{
@@ -96,6 +97,7 @@ export default function EducationSpiral({ theme }: EducationSpiralProps) {
                   // Stagger overlapping effect like a staircase
                   marginTop: idx === 0 ? 0 : "-40px",
                   marginLeft: idx % 2 === 0 ? "-5%" : "5%",
+                  transformStyle: "preserve-3d",
                 }}
               >
                 <div className="flex flex-col md:flex-row md:items-start gap-6">
@@ -172,6 +174,7 @@ export default function EducationSpiral({ theme }: EducationSpiralProps) {
                   y: 0,
                   scale: 1,
                   filter: "blur(0px)",
+                  rotateX: 0,
                 }}
                 viewport={{ once: false, amount: 0.1, margin: "-10%" }}
                 transition={{

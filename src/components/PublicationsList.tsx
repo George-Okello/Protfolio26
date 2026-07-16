@@ -45,8 +45,8 @@ function PublicationCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, filter: "blur(8px)", scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+      initial={{ opacity: 0, y: 60, filter: "blur(8px)", scale: 0.95, rotateX: -15 }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1, rotateX: 0 }}
       whileHover={{ y: -8, rotateX: 2, rotateY: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.98, y: 0, rotateX: 0, rotateY: 0 }}
       viewport={{ once: false, amount: 0.2, margin: "-50px" }}
@@ -160,14 +160,14 @@ function NeuralNetworkButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`group relative inline-flex items-center justify-center px-8 py-4 font-mono text-[10px] uppercase tracking-widest font-semibold overflow-hidden border transition-all duration-500 ${
+      className={`group relative inline-flex items-center justify-center px-8 py-4 font-mono text-[10px] uppercase tracking-widest font-semibold overflow-hidden border transition-all duration-300 ${
         isDark
           ? "border-emerald-500/40 text-emerald-400 hover:text-emerald-300 hover:border-emerald-400"
           : "border-emerald-600/50 text-emerald-800 hover:text-emerald-900 bg-white hover:border-emerald-600 shadow-sm"
       }`}
     >
       {/* Neural nodes and connecting lines effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-500 pointer-events-none">
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 pointer-events-none">
         {/* Nodes */}
         <div
           className={`absolute top-2 left-2 w-1.5 h-1.5 rounded-full ${isDark ? "bg-emerald-400" : "bg-emerald-600"}`}
@@ -464,8 +464,8 @@ export default function PublicationsList({ theme }: PublicationsListProps) {
                 .map((p, idx) => (
                 <motion.div
                   key={p.id}
-                  initial={{ opacity: 0, x: -40, filter: "blur(8px)" }}
-                  whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 50, filter: "blur(8px)", rotateX: -15, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)", rotateX: 0, scale: 1 }}
                   whileHover={{ y: -8, rotateX: 2, rotateY: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.98, y: 0, rotateX: 0, rotateY: 0 }}
                   viewport={{ once: false, amount: 0.1, margin: "-50px" }}
