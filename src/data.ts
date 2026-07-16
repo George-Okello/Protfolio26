@@ -1,5 +1,15 @@
 import { Project, Experience, Education, Award, Publication } from "./types";
 
+
+export const magazines = [
+  {
+    id: "mag-v1",
+    title: "Magazine Vol. 1",
+    date: "July 2026",
+    link: "https://heyzine.com/flip-book/c33e22041c.html"
+  }
+];
+
 export const personalInfo = {
   name: "George Okello Ouma",
   fullName: "George Okello Ouma",

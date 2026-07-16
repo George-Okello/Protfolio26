@@ -87,7 +87,7 @@ export default function EducationSpiral({ theme }: EducationSpiralProps) {
                   bounce: 0.4,
                   delay: idx * 0.1,
                 }}
-                className={`relative w-full md:w-[600px] p-8 md:p-10 border transition-all duration-500 z-10 hover:z-20 ${
+                className={`relative w-full md:w-[600px] p-6 sm:p-8 md:p-10 border transition-all duration-500 z-10 hover:z-20 ${
                   isDark
                     ? "bg-[#1A1A1A]/90 backdrop-blur-md border-white/10 hover:border-orange-500/30 hover:bg-[#222]/90 hover:shadow-2xl hover:shadow-orange-900/20"
                     : "bg-white/90 backdrop-blur-md border-black/5 hover:border-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/10"

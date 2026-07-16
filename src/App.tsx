@@ -265,11 +265,6 @@ export default function App() {
   }, []);
 
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
 
   // Sync theme with DOM body classes for elegant global styling transitions
   useEffect(() => {
@@ -429,7 +424,7 @@ export default function App() {
                 duration: 0.4,
                 ease: [0.25, 1, 0.5, 1],
               }}
-              className={`md:hidden fixed inset-0 z-40 flex flex-col pt-32 px-8 ${
+              className={`md:hidden fixed inset-0 z-40 flex flex-col pt-32 px-6 sm:px-8 ${
                 isDark ? "bg-[#0B0F19]" : "bg-[#FAFAF9]"
               }`}
             >
@@ -520,10 +515,10 @@ export default function App() {
                 className="space-y-4"
               >
                 {/* Display name */}
-                <h1 className="text-6xl md:text-[140px] font-bold leading-[0.82] tracking-[-0.04em] uppercase mb-10">
+                <h1 className="text-5xl sm:text-7xl md:text-[100px] lg:text-[140px] font-bold leading-[0.82] tracking-[-0.04em] uppercase mb-6 sm:mb-10">
                   G.OKELLO
                   <br />
-                  <span className="ml-12 md:ml-20 flex items-center pt-2 text-[clamp(2rem,5vw,5rem)]">
+                  <span className="ml-4 sm:ml-12 md:ml-20 flex items-center pt-2 text-[clamp(1.5rem,5vw,5rem)]">
                     <span
                       className={`hidden md:block w-32 h-[1px] mr-8 ${isDark ? "bg-white/60 backdrop-blur-md" : "bg-[#121212]"}`}
                     ></span>
