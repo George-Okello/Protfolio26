@@ -1,1157 +1,747 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
-import {
-  Brain,
-  Languages,
-  Users,
-  Mail,
-  MapPin,
-  ArrowRight,
-  ExternalLink,
-  Info,
-  Menu,
-  X,
-  ArrowUp,
-  User,
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
+import { Menu, X, ArrowRight, Sparkles, Terminal } from 'lucide-react';
+import { NetworkBackground } from './components/NetworkBackground';
+import { ScrollToTop } from './components/ScrollToTop';
+import { FooterGlobe } from './components/FooterGlobe';
+import { CustomCursor } from './components/CustomCursor';
+import { SmoothScroll } from './components/SmoothScroll';
+import { TerminalMode } from './components/TerminalMode';
+import { Hero, About, InteractiveLab, Publications, Projects, GrantsAndAwards, KaggleSection, Notes, ArchivedFieldNotes, SwarmSection, Contact } from './sections';
 
-import { RevealWrapper } from "./components/RevealWrapper";
-import { RevealText } from "./components/RevealText";
-import { personalInfo } from "./data";
-import AmbientBackground from "./components/AmbientBackground";
-import ScrollParticles from "./components/ScrollParticles";
-import NeuralCanvas from "./components/NeuralCanvas";
-import { lazy, Suspense } from "react";
-const ResearchSandbox = lazy(() => import("./components/ResearchSandbox"));
-const PublicationsList = lazy(() => import("./components/PublicationsList"));
-const AcademicTimeline = lazy(() => import("./components/AcademicTimeline"));
-const EducationSpiral = lazy(() => import("./components/EducationSpiral"));
-const GenerativeArt = lazy(() => import("./components/GenerativeArt"));
-const TechnicalSkills = lazy(() =>
-  import("./components/TechnicalSkills").then((m) => ({
-    default: m.TechnicalSkills,
-  })),
-);
-
-import MagneticCursor from "./components/MagneticCursor";
-import TerminalOverlay from "./components/TerminalOverlay";
-
-import Loader from "./components/Loader";
-import trustImg from "./assets/images/computational_trust_magazine_1783364483351.jpg";
-import networkImg from "./assets/images/network_topology_magazine_1783392429129.jpg";
-import ganEthicsImg from "./assets/images/gan_ethics_magazine_1783392443859.jpg";
-import brainComputerImg from "./assets/images/brain_computer_magazine_1783364500004.jpg";
-import nlpReasoningImg from "./assets/images/nlp_reasoning_magazine_1783392458260.jpg";
-import rlApplicationsImg from "./assets/images/rl_applications_magazine_1783392472442.jpg";
-
-import SEO from "./components/SEO";
-import profileHeadshot from "./assets/images/Jul 15, 2026, 11_49_45 AM.png";
-
-function Grain() {
-  return (
-    <div
-      className="pointer-events-none fixed inset-0 z-50 h-full w-full mix-blend-overlay opacity-[0.04]"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-      }}
-    />
-  );
-}
-
-const darkPublications = [
-  {
-    image: trustImg,
-    title: "Computational Trust & Agent Dynamics",
-    subtitle:
-      "Simulating Multi-Agent reinforcement learning under noisy environments",
-  },
-  {
-    image: networkImg,
-    title: "Network Topology & Graph Neural Networks",
-    subtitle:
-      "Decoding structural complexities in multi-layered AI architectures",
-  },
-  {
-    image: ganEthicsImg,
-    title: "GANs & Ethical Constraints",
-    subtitle: "Balancing creativity and constraint in machine learning",
-  },
+const RESEARCH_QUESTIONS = [
+  "Can AI Be Human in Thought?",
+  "How do networks optimize latency under failure?",
+  "What emerges from multi-agent cooperation?",
+  "Mapping attention to neural substrates",
+  "Reinforcement learning with cognitive biases"
 ];
 
-const lightPublications = [
-  {
-    image: brainComputerImg,
-    title: "Brain-Computer Interface Design",
-    subtitle: "Mapping cognitive states and language retrieval dynamics",
-  },
-  {
-    image: nlpReasoningImg,
-    title: "NLP & Contextual Reasoning",
-    subtitle: "Exploring attention mechanisms in large language models",
-  },
-  {
-    image: rlApplicationsImg,
-    title: "Reinforcement Learning Realities",
-    subtitle: "Optimizing real-world complex systems with deep Q-networks",
-  },
+const NAV_LINKS = [
+  { label: "About", href: "#about" },
+  { label: "Publications", href: "#research" },
+  { label: "Simulations", href: "#lab" },
+  { label: "Implementations", href: "#projects" },
+  { label: "Contact", href: "#contact" }
 ];
 
-function SectionDivider({ isDark }: { isDark: boolean }) {
-  return (
-    <motion.div
-      className="w-full flex justify-center py-8"
-      initial={{ opacity: 0, filter: "blur(5px)" }}
-      whileInView={{ opacity: 1, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0, margin: "0px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-    >
-      <motion.div
-        initial={{ scaleX: 0 }}
-        whileInView={{ scaleX: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
-        className={`h-px w-2/3 max-w-3xl ${isDark ? "bg-gradient-to-r from-transparent via-white/20 to-transparent" : "bg-gradient-to-r from-transparent via-black/20 to-transparent"}`}
-      />
-    </motion.div>
-  );
+interface HeaderProps {
+  onActivateTerminal: () => void;
 }
 
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
+function Header({ onActivateTerminal }: HeaderProps) {
+  const [qIndex, setQIndex] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
 
-  return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-[2px] origin-left bg-gradient-to-r from-orange-500 to-amber-300 z-[100]"
-      style={{ scaleX }}
-    />
-  );
-}
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLogoClicks((prev) => {
+      const next = prev + 1;
+      if (next >= 5) {
+        onActivateTerminal();
+        return 0;
+      }
+      return next;
+    });
+  };
 
-const TITLES = ["RESEARCHER", "AI & MLOPS\nENGINEER"];
-
-function OscillatingTitle() {
-  const [index, setIndex] = React.useState(0);
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % TITLES.length);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQIndex((prev) => (prev + 1) % RESEARCH_QUESTIONS.length);
     }, 4000);
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, []);
 
-  const lines = TITLES[index].split("\n");
+  // Prevent scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  const menuVariants = {
+    closed: {
+      opacity: 0,
+      y: "-100%",
+      transition: {
+        duration: 0.5,
+        ease: [0.3, 0, 0.1, 1],
+        staggerChildren: 0.05,
+        staggerDirection: -1
+      }
+    },
+    open: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.65,
+        ease: [0.16, 1, 0.3, 1],
+        staggerChildren: 0.08,
+        delayChildren: 0.15
+      }
+    }
+  };
+
+  const linkVariants = {
+    closed: { y: 30, opacity: 0, rotate: 2 },
+    open: { 
+      y: 0, 
+      opacity: 1, 
+      rotate: 0,
+      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
 
   return (
-    <div className="relative inline-flex overflow-hidden items-center text-[clamp(1.25rem,3.5vw+0.5rem,4rem)] font-light opacity-70 leading-[0.95] tracking-tight py-2 -my-2 pr-4 -mr-4">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -30 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="flex flex-col items-start pr-2"
-        >
-          {lines.map((line, i) => (
-            <span key={i} className="whitespace-nowrap">
-              {line}
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-6 bg-[#fcfaf7]/90 backdrop-blur-md border-b border-[#1a1a1a]/5 transition-all duration-300">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold text-[#1a1a1a]">
+          
+          {/* Logo (Easter Egg: Click 5 times to activate terminal) */}
+          <a 
+            href="#" 
+            onClick={handleLogoClick}
+            className="flex items-center gap-3 hover:text-orange-highlight transition-all duration-300 relative z-50 group"
+          >
+            <div className="flex items-center justify-center w-5 h-5 border border-[#1a1a1a] group-hover:border-orange-highlight rounded-full transition-colors duration-300">
+              <span 
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  logoClicks > 0 ? 'bg-orange-highlight animate-ping' : 'bg-[#1a1a1a] group-hover:bg-orange-highlight animate-pulse'
+                }`}
+                style={{
+                  animationDuration: logoClicks > 0 ? `${Math.max(0.15, 1.2 - logoClicks * 0.25)}s` : undefined
+                }}
+              />
+            </div>
+            <span className="font-sans font-bold tracking-widest">
+              {logoClicks > 0 ? `George Okello [${logoClicks}/5]` : 'George Okello'}
             </span>
-          ))}
-        </motion.div>
+          </a>
+          
+          {/* Rotating Research Questions (Hidden on small mobile, visible on iPad and Desktop) */}
+          <div className="hidden sm:flex flex-1 justify-center overflow-hidden px-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={qIndex}
+                initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -8, filter: "blur(2px)" }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[#8a817c] italic font-serif lowercase tracking-widest text-[11px] text-center max-w-md truncate"
+              >
+                "{RESEARCH_QUESTIONS[qIndex]}"
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-8">
+            {NAV_LINKS.map((link) => (
+              <a 
+                key={link.label} 
+                href={link.href} 
+                className="hover:text-orange-highlight transition-colors duration-300 relative group py-1"
+              >
+                <span>{link.label}</span>
+                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-orange-highlight scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </a>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex lg:hidden items-center relative z-50">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="p-2 -mr-2 text-[#1a1a1a] hover:opacity-75 transition-opacity focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <X className="w-5 h-5" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="open"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <Menu className="w-5 h-5" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Fly-In / Fly-Out Mobile & iPad Overlay Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            className="fixed inset-0 z-40 bg-[#fcfaf7] pt-28 px-6 md:px-12 pb-12 flex flex-col justify-between overflow-y-auto lg:hidden"
+          >
+            {/* Ambient Background Watermark */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none z-0">
+              <span className="font-serif italic text-[18vw]">Okello</span>
+            </div>
+
+            <div className="relative z-10 flex flex-col justify-center flex-grow max-w-lg mx-auto w-full">
+              <div className="text-[10px] tracking-[0.25em] text-[#8a817c] uppercase font-bold mb-6 border-b border-[#1a1a1a]/10 pb-2 w-fit">
+                Navigation Index
+              </div>
+
+              {/* Dynamic Fly-In Links list */}
+              <div className="flex flex-col gap-6 md:gap-8">
+                {NAV_LINKS.map((link) => (
+                  <div key={link.label} className="overflow-hidden py-1">
+                    <motion.div variants={linkVariants}>
+                      <a
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        className="text-3xl md:text-4xl font-serif italic text-[#1a1a1a] hover:text-orange-highlight transition-colors flex items-center justify-between group"
+                      >
+                        <span className="relative">
+                          {link.label}
+                          <span className="absolute bottom-0 left-0 w-full h-[2px] bg-orange-highlight scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                        </span>
+                        <ArrowRight className="w-6 h-6 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-orange-highlight transition-all duration-300 text-[#8a817c]" />
+                      </a>
+                    </motion.div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Drawer Footer with rotating queries / status */}
+            <motion.div 
+              variants={linkVariants}
+              className="relative z-10 mt-12 pt-6 border-t border-[#1a1a1a]/10 text-center max-w-lg mx-auto w-full flex flex-col gap-4 text-[10px] md:text-xs text-[#8a817c] tracking-widest uppercase font-mono"
+            >
+              <div className="flex justify-center items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#1a1a1a] animate-pulse" />
+                <span>Explorations in Complex Systems</span>
+              </div>
+              <div className="text-[9px] opacity-70">
+                Nairobi, Kenya • Click outside or select a path to exit
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
+    </>
+  );
+}
+
+function NoiseOverlay() {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[200] h-full w-full opacity-[0.035] mix-blend-overlay">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 h-full w-full">
+        <filter id="noiseFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+      </svg>
     </div>
   );
 }
 
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      className="group relative py-2 opacity-60 hover:opacity-100 transition-opacity"
-    >
-      {children}
-      <span className="absolute bottom-0 left-0 w-full h-[1px] bg-current origin-right scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 group-active:scale-x-100 group-hover:origin-left group-active:origin-left" />
-    </a>
-  );
-}
+function InitialLoader({ onComplete }: { onComplete: () => void }) {
+  const [subText, setSubText] = useState("Translating brain signals...");
 
-function MagneticWrapper({ children }: { children: React.ReactElement }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    
+    const t1 = setTimeout(() => setSubText("Establishing neural links..."), 1200);
+    const t2 = setTimeout(() => setSubText("Calibrating network weights..."), 2400);
+    const t3 = setTimeout(() => setSubText("Accessing complex systems..."), 3600);
 
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
-    const middleX = clientX - (left + width / 2);
-    const middleY = clientY - (top + height / 2);
-    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
-  };
+    const timer = setTimeout(() => {
+      document.body.style.overflow = 'unset';
+      onComplete();
+    }, 4500);
+    
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(timer);
+      document.body.style.overflow = 'unset';
+    };
+  }, [onComplete]);
 
-  const reset = () => {
-    setPosition({ x: 0, y: 0 });
-  };
-
-  const { x, y } = position;
   return (
     <motion.div
-      ref={ref}
-      onMouseMove={handleMouse}
-      onMouseLeave={reset}
-      animate={{ x, y }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-[300] bg-[#fcfaf7] flex flex-col items-center justify-center pointer-events-auto select-none"
     >
-      {children}
+      <div className="overflow-hidden mb-6">
+        <motion.div
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="text-[10px] md:text-xs uppercase tracking-[0.4em] font-bold text-[#1a1a1a] flex items-center gap-3"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            className="w-3 h-3 border-2 border-[#1a1a1a]/20 border-t-orange-highlight rounded-full"
+          />
+          Initializing
+        </motion.div>
+      </div>
+      <div className="w-48 md:w-64 h-[1px] bg-[#1a1a1a]/10 relative overflow-hidden">
+        <motion.div
+          className="absolute top-0 left-0 h-full bg-orange-highlight"
+          initial={{ width: "0%" }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 3.5, delay: 0.5, ease: "easeInOut" }}
+        />
+      </div>
+      <div className="mt-6 h-4 overflow-hidden flex justify-center items-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={subText}
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -10, opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-[9px] uppercase tracking-widest text-[#8a817c] italic font-serif"
+          >
+            {subText}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeCanvasTask, setActiveCanvasTask] = useState<string>("resting");
-  const [featuredIndex, setFeaturedIndex] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [isTerminalActive, setIsTerminalActive] = useState(false);
+  const [globalGlitch, setGlobalGlitch] = useState(false);
+  const [typedSequence, setTypedSequence] = useState("");
+
+  // Site Easter Egg States
+  const [gravityMode, setGravityMode] = useState(false);
+  const [neonMode, setNeonMode] = useState(false);
+  const [partyMode, setPartyMode] = useState(false);
+  const [invertMode, setInvertMode] = useState(false);
+  const [showHUD, setShowHUD] = useState(false);
 
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [mobileMenuOpen]);
+    // Revert/cleanup dark mode completely
+    const root = window.document.documentElement;
+    root.classList.remove('dark');
+    root.classList.remove('theme-transition');
+    localStorage.removeItem('theme-preference');
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > window.innerHeight * 0.8);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Easter egg welcome message in console
+    console.log(
+      "%c[SYS] Welcome to George Okello's Complex Systems Gateway.%c\nSecret inputs detected: Try typing 'glitch', 'gravity', 'neon', 'party', 'invert', or 'terminal' anywhere on the page to trigger subterranean protocols.",
+      "color: #ff5a09; font-weight: bold; font-size: 14px;",
+      "color: #8a817c; font-size: 11px;"
+    );
   }, []);
 
+  // Sync Easter Eggs to HTML document root classes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setFeaturedIndex((prev) => {
-        let nextIndex;
-        do {
-          nextIndex = Math.floor(Math.random() * darkPublications.length);
-        } while (nextIndex === prev && darkPublications.length > 1);
-        return nextIndex;
-      });
-    }, 30000);
-    return () => clearInterval(interval);
+    const root = document.documentElement;
+    if (gravityMode) root.classList.add('gravity-active');
+    else root.classList.remove('gravity-active');
+  }, [gravityMode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (neonMode) root.classList.add('neon-active');
+    else root.classList.remove('neon-active');
+  }, [neonMode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (partyMode) root.classList.add('party-active');
+    else root.classList.remove('party-active');
+  }, [partyMode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (invertMode) root.classList.add('invert-active');
+    else root.classList.remove('invert-active');
+  }, [invertMode]);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      
+      // ESC key to reset all easter eggs
+      if (e.key === "Escape") {
+        setGravityMode(false);
+        setNeonMode(false);
+        setPartyMode(false);
+        setInvertMode(false);
+        setShowHUD(false);
+        return;
+      }
+
+      if (key.length === 1 && /^[a-z]$/.test(key)) {
+        setTypedSequence((prev) => {
+          const next = (prev + key).slice(-12);
+          
+          if (next.endsWith("glitch")) {
+            setGlobalGlitch(true);
+            setTimeout(() => {
+              setGlobalGlitch(false);
+              setIsTerminalActive(true);
+            }, 2200);
+            return "";
+          }
+          
+          if (next.endsWith("terminal")) {
+            setIsTerminalActive(true);
+            return "";
+          }
+
+          if (next.endsWith("gravity")) {
+            setGravityMode((prev) => !prev);
+            setShowHUD(true);
+            return "";
+          }
+
+          if (next.endsWith("neon") || next.endsWith("matrix")) {
+            setNeonMode((prev) => !prev);
+            setShowHUD(true);
+            return "";
+          }
+
+          if (next.endsWith("party") || next.endsWith("confetti")) {
+            setPartyMode((prev) => !prev);
+            setShowHUD(true);
+            return "";
+          }
+
+          if (next.endsWith("invert")) {
+            setInvertMode((prev) => !prev);
+            setShowHUD(true);
+            return "";
+          }
+
+          if (next.endsWith("reset")) {
+            setGravityMode(false);
+            setNeonMode(false);
+            setPartyMode(false);
+            setInvertMode(false);
+            setShowHUD(false);
+            return "";
+          }
+          
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
   const { scrollYProgress } = useScroll();
-
-  // Sync theme with DOM body classes for elegant global styling transitions
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
-
-  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!document.startViewTransition) {
-      setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-      return;
-    }
-
-    const x = e.clientX;
-    const y = e.clientY;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    );
-
-    document.documentElement.classList.add("is-changing-theme");
-
-    const transition = document.startViewTransition(() => {
-      setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 700,
-          easing: "cubic-bezier(0.645, 0.045, 0.355, 1)",
-          pseudoElement: "::view-transition-new(root)",
-        },
-      );
-    });
-
-    transition.finished.finally(() => {
-      document.documentElement.classList.remove("is-changing-theme");
-    });
-  };
-
-  const isDark = theme === "dark";
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   return (
-    <>
-      <SEO />
-      <Grain />
-      <ScrollProgress />
-      <TerminalOverlay isDark={isDark} />
-      {isLoading && (
-        <Loader onComplete={() => setIsLoading(false)} isDark={isDark} />
-      )}
-      <div
-        className={`min-h-screen transition-colors duration-500 font-sans  ${
-          isDark ? "bg-[#0B0F19] text-[#F7F7F7]" : "bg-[#F2F2F2] text-[#2D2D2D]"
-        }`}
-      >
-        <MagneticCursor />
-        <AmbientBackground isDark={isDark} />
-        <ScrollParticles isDark={isDark} />
+    <div className="relative min-h-screen bg-[#fcfaf7] selection:bg-[#1a1a1a]/10 overflow-x-hidden text-[#1a1a1a]">
+      <NoiseOverlay />
+      <SmoothScroll />
+      <CustomCursor />
+      
+      <AnimatePresence>
+        {loading && <InitialLoader onComplete={() => setLoading(false)} />}
+      </AnimatePresence>
 
-        {/* 1. HEADER & CAPSULE NAVIGATION */}
-        <motion.header
-          initial={{ opacity: 0, y: -40, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-          className="fixed top-0 left-0 w-full z-50 px-6 md:px-12 pt-6"
-        >
+      <AnimatePresence>
+        {isTerminalActive && (
+          <TerminalMode onExit={() => setIsTerminalActive(false)} />
+        )}
+      </AnimatePresence>
 
-          <div
-            className={`relative z-50 mx-auto flex items-start justify-between transition-all duration-300 pb-6 border-b ${
-              isDark ? "border-white/10" : "border-black/5"
-            }`}
+      <AnimatePresence>
+        {globalGlitch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.8, 1, 0.9, 1] }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[250] bg-red-950/30 mix-blend-difference pointer-events-none border-8 border-red-500/50 flex flex-col items-center justify-center font-mono text-rose-500 p-8"
           >
-            {/* Logo / Brand Name */}
-            <div className="flex flex-col">
-              <a
-                href="#hero"
-                className="text-sm font-semibold tracking-tighter uppercase"
-              >
-                George Okello
-              </a>
-              <span className="text-[10px] opacity-60 uppercase tracking-[0.2em] mt-0.5">
-                Computational Researcher
-              </span>
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_6px] pointer-events-none" />
+            <div className="absolute inset-0 bg-red-500/5 mix-blend-color-burn pointer-events-none animate-pulse" />
+            
+            <div className="bg-black/95 border border-rose-500/50 p-8 rounded shadow-2xl max-w-md text-center space-y-4">
+              <span className="w-12 h-12 border border-rose-500 flex items-center justify-center rounded-full text-2xl mx-auto animate-spin">⚡</span>
+              <h4 className="text-sm font-bold tracking-[0.25em] uppercase">SYSTEM GLITCH INTRUSION</h4>
+              <p className="text-[10px] leading-relaxed text-rose-400">
+                CRITICAL BUFFER OVERFLOW. DETECTED SEQUENCE: "GLITCH". FORCING SYSTEM COGNITIVE DOWNSHIFT. REDIRECTING TERMINAL PIPELINE...
+              </p>
+              <div className="text-[9px] text-slate-500 animate-pulse uppercase">
+                re-modulating frequency spectrum in 2000ms
+              </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-10 text-[10px] uppercase tracking-[0.25em] font-medium">
-              {[
-                { label: "About", href: "#about" },
-                { label: "Lab Sandbox", href: "#sandbox" },
-                { label: "Portfolio", href: "#portfolio" },
-                { label: "Chronicle", href: "#chronicle" },
-                { label: "Creative", href: "#creative" },
-              ].map((link) => (
-                <NavLink key={link.label} href={link.href}>
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: loading ? 0 : 1 }}
+        transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <motion.div 
+          className="fixed top-0 left-0 right-0 h-[3px] bg-orange-highlight origin-left z-[100]" 
+          style={{ scaleX }} 
+        />
+        <NetworkBackground />
+        <Header onActivateTerminal={() => setIsTerminalActive(true)} />
+        <main className="relative z-10 mx-auto max-w-7xl xl:max-w-[1360px] 2xl:max-w-[1536px] px-6 md:px-12 lg:px-24 pt-32">
+          <Hero />
+          <About />
+          <InteractiveLab />
+          <Publications />
+          <Projects />
+          <GrantsAndAwards />
+          <KaggleSection />
+          <Notes />
+          <ArchivedFieldNotes />
+          <SwarmSection />
+          <Contact />
+        </main>
 
-            {/* Action buttons (Theme and Contact) */}
-            <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.25em] font-medium">
-              {/* Theme toggler */}
-              <button
-                onClick={toggleTheme}
-                className="hover:opacity-70 transition-opacity uppercase"
-                title="Toggle Neural Mode"
-                id="theme-toggle-btn"
-              >
-                {isDark ? "Light" : "Dark"}
-              </button>
+        <footer className="relative z-10 border-t border-[#1a1a1a]/10 py-16 bg-[#1a1a1a] text-[#fcfaf7] px-6 md:px-12 text-[9px] uppercase tracking-[0.3em] mt-24 overflow-hidden">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left relative">
+            <div className="flex flex-col md:flex-row items-center gap-12 z-10 w-full md:w-auto">
+              <div className="-my-12">
+                <FooterGlobe />
+              </div>
+              <div className="flex flex-col gap-4 flex-grow">
+                <span className="text-[#fcfaf7] tracking-[0.4em] font-bold">© {new Date().getFullYear()} George Okello.</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1 text-[#8a817c]/50 font-mono tracking-wider text-[7.5px] leading-relaxed">
+                    <button 
+                      onClick={() => setShowCredentials(!showCredentials)}
+                      className="text-orange-highlight hover:opacity-80 transition-opacity font-bold tracking-wider cursor-pointer uppercase text-[7px]"
+                    >
+                      {showCredentials ? '[close_baselines.log]' : '[query_baselines.log]'}
+                    </button>
+                    <span className="text-[#8a817c]/20 select-none">•</span>
+                    <button 
+                      onClick={() => setShowHUD(!showHUD)}
+                      className="hover:text-orange-highlight transition-colors font-bold tracking-wider cursor-pointer uppercase text-[7px]"
+                    >
+                      {showHUD ? '[close_subroutines.sys]' : '[subterranean_subroutines.sys]'}
+                    </button>
+                  </div>
+                </div>
 
-              {/* Quick Contact Link */}
-              <a
-                href="mailto:georgeokelloouma@gmail.com"
-                className="hidden lg:block hover:opacity-70 transition-opacity uppercase"
-                id="navbar-contact-btn"
-              >
-                Contact
-              </a>
-
-              <button
-                className="lg:hidden hover:opacity-70 transition-opacity"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
+                <AnimatePresence>
+                  {showCredentials && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden w-full max-w-xl text-left"
+                    >
+                      <div className="bg-[#121110] text-[#fcfaf7] font-mono text-[9px] md:text-[10px] p-4 rounded-lg border border-white/5 space-y-2.5 shadow-2xl relative">
+                        <div className="absolute top-3 right-3 text-[7.5px] text-[#8a817c] tracking-widest uppercase">
+                          acc: verified
+                        </div>
+                        <div className="text-[#8a817c] flex items-center gap-2 uppercase tracking-widest text-[8px] mb-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-highlight animate-pulse" />
+                          SYS.ACCREDITATIONS // CROSS-DOMAIN BASELINES & EXPERIMENTATION LOGS
+                        </div>
+                        <div className="border-t border-white/10 my-2" />
+                        
+                        {[
+                          { 
+                            code: "HW-03", 
+                            title: "Certificate in Computer & Mobile Repair", 
+                            narrative: "A hardware hobby for low-level diagnostic experiments. Used to salvage bricked electronics—most notably turning a dead Nokia E3 from complete e-waste into a fully functional device.",
+                            link: { text: "view nokia e3 restore on youtube", url: "https://www.youtube.com/@georgeokello_" }
+                          },
+                          { 
+                            code: "SEC-02", 
+                            title: "Certificate in Cyber Security Analysis", 
+                            narrative: "Studied to build a fundamental understanding of systemic vulnerability, threat modeling, and analyzing high-dimensional communication topologies." 
+                          },
+                          { 
+                            code: "DS-01", 
+                            title: "Certificate in Data Science", 
+                            narrative: "The analytical substrate supporting every project on this site, translating raw simulation outputs into structured insights and visual logic." 
+                          }
+                        ].map((item, idx) => (
+                          <div 
+                            key={idx}
+                            className="p-3.5 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300 flex flex-col gap-2"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-orange-highlight font-bold select-none text-[8.5px]">[{item.code}]</span>
+                                <span className="text-[#fcfaf7] font-semibold uppercase tracking-wider text-[8.5px]">{item.title}</span>
+                              </div>
+                              <span className="text-[#8a817c] text-[7px] uppercase tracking-widest font-bold">applied baseline</span>
+                            </div>
+                            <p className="text-[#8a817c] text-[8.5px] leading-relaxed lowercase normal-case tracking-normal">
+                              {item.narrative}
+                            </p>
+                            {item.link && (
+                              <div className="mt-1">
+                                <a 
+                                  href={item.link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-orange-highlight hover:underline font-bold text-[7.5px] uppercase tracking-widest"
+                                >
+                                  <span>↳ {item.link.text}</span>
+                                  <span className="text-[6.5px]">↗</span>
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
+            <span className="opacity-50 z-10">Explorations in Complex Systems</span>
           </div>
-        </motion.header>
+        </footer>
+        <ScrollToTop />
 
-        {/* Mobile menu dropdown */}
+        {/* Subterranean Secrets HUD Control Panel */}
         <AnimatePresence>
-          {mobileMenuOpen && (
+          {(gravityMode || neonMode || partyMode || invertMode || showHUD) && (
             <motion.div
-              initial={{ opacity: 0, y: "-100%" }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "-100%" }}
-              transition={{
-                type: "tween",
-                duration: 0.4,
-                ease: [0.25, 1, 0.5, 1],
-              }}
-              className={`lg:hidden fixed inset-0 z-40 flex flex-col pt-32 px-6 sm:px-8 ${
-                isDark ? "bg-[#0B0F19]" : "bg-[#FAFAF9]"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              className={`fixed bottom-24 left-6 md:left-8 z-[150] max-w-[280px] sm:max-w-xs w-full backdrop-blur-lg border rounded-xl p-5 shadow-2xl font-mono text-[9px] md:text-[10px] transition-all duration-500 ${
+                neonMode 
+                  ? 'bg-[#060608]/95 border-[#39ff14]/30 text-[#39ff14] shadow-[#39ff14]/5' 
+                  : 'bg-white/80 border-[#1a1a1a]/10 text-[#1a1a1a] shadow-black/5'
               }`}
             >
-              <div className="flex flex-col gap-8 text-3xl font-serif tracking-tight">
+              <div className={`flex items-center justify-between border-b pb-3 mb-3 ${neonMode ? 'border-[#39ff14]/15' : 'border-[#1a1a1a]/10'}`}>
+                <div className="flex items-center gap-2 font-bold tracking-widest text-orange-highlight">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span>[SUBTERRANEAN_HUD]</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setGravityMode(false);
+                    setNeonMode(false);
+                    setPartyMode(false);
+                    setInvertMode(false);
+                    setShowHUD(false);
+                  }}
+                  className={`hover:text-orange-highlight transition-colors uppercase tracking-widest text-[8px] border px-1.5 py-0.5 rounded cursor-pointer ${
+                    neonMode ? 'border-[#39ff14]/25' : 'border-[#1a1a1a]/15'
+                  }`}
+                >
+                  [reset]
+                </button>
+              </div>
+
+              <p className={`text-[8.5px] mb-3 tracking-wider leading-relaxed ${neonMode ? 'text-[#39ff14]/70' : 'text-slate-500'}`}>
+                System subroutines active. Toggle environmental constraints or parameters below:
+              </p>
+
+              <div className="space-y-1.5">
                 {[
-                  { label: "About", href: "#about" },
-                  { label: "Lab Sandbox", href: "#sandbox" },
-                  { label: "Portfolio", href: "#portfolio" },
-                  { label: "Chronicle", href: "#chronicle" },
-                  { label: "Creative", href: "#creative" },
-                ].map((link, i) => (
-                  <motion.a
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 + i * 0.05, duration: 0.4 }}
-                    key={link.label}
-                    href={link.href}
-                    className="hover:opacity-60 transition-opacity block border-b border-current/10 pb-4"
-                    onClick={() => setMobileMenuOpen(false)}
+                  { id: "gravity", label: "gravity_override", value: gravityMode, setter: setGravityMode },
+                  { id: "neon", label: "cyber_neon_reskin", value: neonMode, setter: setNeonMode },
+                  { id: "party", label: "spark_particle_trail", value: partyMode, setter: setPartyMode },
+                  { id: "invert", label: "color_inversion", value: invertMode, setter: setInvertMode }
+                ].map((item) => (
+                  <label 
+                    key={item.id}
+                    className={`flex items-center justify-between p-2 rounded border border-transparent transition-all duration-200 cursor-pointer group ${
+                      neonMode 
+                        ? 'hover:bg-[#39ff14]/5 hover:border-[#39ff14]/10' 
+                        : 'hover:bg-[#1a1a1a]/5 hover:border-[#1a1a1a]/5'
+                    }`}
                   >
-                    {link.label}
-                  </motion.a>
+                    <span className="tracking-widest uppercase text-[8.5px]">{item.label}</span>
+                    <input
+                      type="checkbox"
+                      checked={item.value}
+                      onChange={(e) => item.setter(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all duration-200 ${
+                      item.value 
+                        ? 'bg-orange-highlight border-orange-highlight' 
+                        : neonMode 
+                          ? 'border-[#39ff14]/40 group-hover:border-[#39ff14]' 
+                          : 'border-[#1a1a1a]/30 group-hover:border-orange-highlight'
+                    }`}>
+                      {item.value && <span className="w-1 h-1 rounded-full bg-white animate-pulse" />}
+                    </div>
+                  </label>
                 ))}
               </div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-auto mb-12 flex flex-col gap-6"
-              >
-                <div className="text-[10px] font-mono uppercase tracking-widest opacity-50">
-                  Say Hello
-                </div>
-                <div className="flex flex-col gap-1 w-full">
-                  <a
-                    href="mailto:georgeokelloouma@gmail.com"
-                    className="text-sm font-mono tracking-wider flex items-center justify-between hover:opacity-70 transition-opacity border-current/10 pb-4 border-b w-full"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5" />
-                      <span className="truncate">
-                        georgeokelloouma@gmail.com
-                      </span>
-                    </div>
-                  </a>
-                </div>
-              </motion.div>
+              <div className={`mt-3 pt-3 border-t text-[7.5px] flex justify-between items-center ${
+                neonMode ? 'border-[#39ff14]/15 text-[#39ff14]/50' : 'border-[#1a1a1a]/5 text-slate-400'
+              }`}>
+                <span>ESC to reset / close</span>
+                <button 
+                  onClick={() => setIsTerminalActive(true)}
+                  className="text-orange-highlight hover:underline cursor-pointer uppercase font-bold tracking-wider"
+                >
+                  [open_cli]
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 2. DYNAMIC HERO SECTION */}
-        <section
-          id="hero"
-          className="relative min-h-[92vh] flex items-center pt-24 overflow-hidden"
+        {/* Translucent Floating Terminal CLI Button */}
+        <motion.button
+          onClick={() => setIsTerminalActive(true)}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="fixed bottom-8 left-6 md:left-8 z-40 font-mono text-[9px] uppercase tracking-[0.2em] bg-white/70 hover:bg-[#ff5a09] text-[#1a1a1a] hover:text-white px-4 py-3 border border-[#1a1a1a]/10 hover:border-[#ff5a09]/20 rounded-full transition-all duration-300 flex items-center gap-2 cursor-pointer backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(255,90,9,0.15)] group"
+          aria-label="Open Terminal CLI"
         >
-          {/* Background interactive Canvas */}
-          <div className="absolute inset-0 z-0">
-            <NeuralCanvas theme={theme} activeTask={activeCanvasTask} />
-            {/* Subtle gradient overlays to keep text readable */}
-            <div
-              className={`absolute inset-0 pointer-events-none transition-all duration-500 ${
-                isDark
-                  ? "bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/85 to-[#0B0F19]/15"
-                  : "bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/90 to-[#FAFAF9]/15"
-              }`}
-            />
-          </div>
-
-          {/* Content container */}
-          <div className="px-6 md:px-12 w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-8">
-            <div className="lg:col-span-8 space-y-6">
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 60,
-                  scale: 0.95,
-                  filter: "blur(15px)",
-                }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                transition={{
-                  duration: 1.5,
-                  ease: [0.16, 1, 0.3, 1],
-                  delay: 0.2,
-                }}
-                className="space-y-4"
-              >
-                {/* Display name */}
-                <h1 className="text-5xl sm:text-7xl md:text-[100px] lg:text-[140px] font-bold leading-[0.82] tracking-[-0.04em] uppercase mb-6 sm:mb-10">
-                  G.OKELLO
-                  <br />
-                  <span className="ml-4 sm:ml-12 md:ml-20 flex items-center pt-2 text-[clamp(1.5rem,5vw,5rem)]">
-                    <span
-                      className={`hidden md:block w-32 h-[1px] mr-8 ${isDark ? "bg-white/60 backdrop-blur-md" : "bg-[#121212]"}`}
-                    ></span>
-                    <OscillatingTitle />
-                  </span>
-                </h1>
-
-                {/* Academic description */}
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 pt-12">
-                  <p className="text-lg leading-snug max-w-[280px] font-light opacity-90">
-                    Deciphering the algorithmic foundations of thought by
-                    intersecting{" "}
-                    <strong className="font-medium">machine learning</strong>{" "}
-                    with{" "}
-                    <strong className="font-medium">
-                      neural architectures
-                    </strong>
-                    .
-                  </p>
-                  <div className="flex gap-2">
-                    <span
-                      className={`px-3 py-1 border rounded-full text-[10px] uppercase tracking-widest ${isDark ? "border-[#F7F7F7]" : "border-[#121212]"}`}
-                    >
-                      Research
-                    </span>
-                    <span
-                      className={`px-3 py-1 border rounded-full text-[10px] uppercase tracking-widest ${isDark ? "border-[#F7F7F7]" : "border-[#121212]"}`}
-                    >
-                      Computational Modelling
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.15 }}
-                className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2"
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`p-2 rounded-xl border ${isDark ? "bg-slate-950/40 border-slate-850" : "bg-white border-slate-200"}`}
-                  >
-                    <Brain className="w-4 h-4 text-orange-500" />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-mono text-slate-400 uppercase">
-                      Focus Region
-                    </div>
-                    <div className="text-xs font-sans font-medium text-slate-400">
-                      EEG / Cognitive State
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`p-2 rounded-xl border ${isDark ? "bg-slate-950/40 border-slate-850" : "bg-white border-slate-200"}`}
-                  >
-                    <Languages className="w-4 h-4 text-orange-500" />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-mono text-slate-400 uppercase">
-                      Bilingual Dynamics
-                    </div>
-                    <div className="text-xs font-sans font-medium text-slate-400">
-                      ACC Switch Trajectory
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 col-span-2 md:col-span-1">
-                  <div
-                    className={`p-2 rounded-xl border ${isDark ? "bg-slate-950/40 border-slate-850" : "bg-white border-slate-200"}`}
-                  >
-                    <Users className="w-4 h-4 text-orange-500" />
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-mono text-slate-400 uppercase">
-                      Multi-Agent RL
-                    </div>
-                    <div className="text-xs font-sans font-medium text-slate-400">
-                      Social Trust Models
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Core CTA */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                className="flex flex-wrap items-center gap-4 pt-12"
-              >
-                <motion.a
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  href="#sandbox"
-                  className={`px-6 py-3 border rounded-full text-[10px] uppercase tracking-widest transition-all ${
-                    isDark
-                      ? "border-[#F7F7F7] hover:bg-[#F7F7F7] hover:text-[#0B0F19]"
-                      : "border-[#121212] hover:bg-[#121212] hover:text-[#F7F7F7]"
-                  }`}
-                  id="hero-sandbox-cta"
-                >
-                  Launch Sandbox Lab
-                </motion.a>
-                <motion.a
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  href="#portfolio"
-                  className={`px-6 py-3 border rounded-full text-[10px] uppercase tracking-widest transition-all ${
-                    isDark
-                      ? "border-white/20 hover:border-white"
-                      : "border-black/20 hover:border-black"
-                  }`}
-                  id="hero-portfolio-cta"
-                >
-                  View Selected Papers
-                </motion.a>
-              </motion.div>
-            </div>
-
-            {/* Hero Visual side representation */}
-            <div
-              className="lg:col-span-4 lg:col-start-9 hidden lg:block"
-              style={{ perspective: "1000px" }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`hero-img-${featuredIndex}-${isDark ? "dark" : "light"}`}
-                  initial={{ opacity: 0, rotateY: 90 }}
-                  animate={{ opacity: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, rotateY: -90 }}
-                  transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className="relative aspect-square w-full rounded-3xl overflow-hidden border border-slate-800/20 shadow-2xl group"
-                  style={{ backfaceVisibility: "hidden" }}
-                >
-                  {/* Image representations matching George's work */}
-                  {isDark ? (
-                    <>
-                      <img
-                        src={darkPublications[featuredIndex].image}
-                        alt={darkPublications[featuredIndex].title}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover transition-transform duration-[30000ms] ease-linear hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
-                      <div className="absolute bottom-5 left-5 right-5">
-                        <span className="text-[9px] font-mono text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full backdrop-blur-md">
-                          FEATURED ISSUE
-                        </span>
-                        <h4 className="text-sm font-sans font-medium text-white mt-2">
-                          {darkPublications[featuredIndex].title}
-                        </h4>
-                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                          {darkPublications[featuredIndex].subtitle}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={lightPublications[featuredIndex].image}
-                        alt={lightPublications[featuredIndex].title}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover transition-transform duration-[30000ms] ease-linear hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/20 to-transparent" />
-                      <div className="absolute bottom-5 left-5 right-5">
-                        <span className="text-[9px] font-mono text-orange-600 bg-orange-500/10 px-2 py-0.5 rounded-full font-semibold backdrop-blur-md">
-                          FEATURED ISSUE
-                        </span>
-                        <h4 className="text-sm font-sans font-semibold text-slate-950 mt-2">
-                          {lightPublications[featuredIndex].title}
-                        </h4>
-                        <p className="text-[10px] text-slate-600 font-mono mt-0.5">
-                          {lightPublications[featuredIndex].subtitle}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. ABOUT SECTION & RESEARCH INTERESTS */}
-        <motion.section
-          id="about"
-          className="py-24 relative mt-12 overflow-hidden"
-          initial={{ opacity: 0, y: 80, scale: 0.95, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0, margin: "0px" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Parallax Background Element */}
-          <motion.div
-            className={`absolute top-0 right-0 w-[800px] h-[800px] rounded-full blur-[100px] opacity-20 pointer-events-none ${isDark ? "bg-orange-500/20" : "bg-orange-300/30"}`}
-            style={{ y: useTransform(scrollYProgress, [0, 1], [-200, 200]) }}
-          />
-          <div className="px-6 md:px-12 w-full relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              {/* Profile Image - Creative Section */}
-              <RevealWrapper className="lg:col-span-3 relative group max-w-xs mx-auto lg:mx-0">
-                <div className="relative aspect-[4/5] w-full overflow-hidden rounded shadow-2xl">
-                  {/* Glitch Overlay Effect */}
-                  <motion.div
-                    className={`absolute inset-0 mix-blend-overlay z-10 transition-opacity duration-700 ${isDark ? "bg-orange-500/20" : "bg-orange-600/10"} group-hover:opacity-0 group-active:opacity-0`}
-                  />
-                  <img
-                    src={profileHeadshot}
-                    alt={personalInfo.name}
-                    className="w-full h-full object-cover filter grayscale-[50%] contrast-125 opacity-90 transition-all duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:grayscale-0 group-active:grayscale-0 group-hover:scale-[1.03] group-active:scale-[1.03] group-hover:contrast-100 group-active:contrast-100"
-                  />
-                  {/* Decorative Architectural Frame */}
-                  <div className={`absolute inset-4 border pointer-events-none transition-all duration-700 ${isDark ? 'border-white/20' : 'border-black/20'} translate-x-2 translate-y-2 group-hover:translate-x-0 group-active:translate-x-0 group-hover:translate-y-0 group-active:translate-y-0 opacity-50 group-hover:opacity-100 group-active:opacity-100`} />
-                  
-                  {/* Scan Line Element */}
-                  <motion.div 
-                    className={`absolute left-0 right-0 h-[1px] ${isDark ? 'bg-orange-500/40' : 'bg-orange-600/30'}`}
-                    animate={{ top: ['0%', '100%', '0%'] }}
-                    transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-                  />
-
-                  {/* Icon badge */}
-                  <div className={`absolute bottom-6 left-6 p-2 backdrop-blur-md rounded-full z-20 ${isDark ? 'bg-black/50 text-white/80' : 'bg-white/50 text-black/80'}`}>
-                    <User className="w-4 h-4 opacity-70" />
-                  </div>
-                </div>
-              </RevealWrapper>
-
-              {/* Biography */}
-              <RevealWrapper className="lg:col-span-5 space-y-6">
-                <h2 className="text-4xl font-serif italic tracking-tight">
-                  <RevealText text="Current Obsession" />
-                </h2>
-                <p className="text-sm font-light opacity-90 leading-relaxed max-w-[400px]">
-                  {personalInfo.bio}
-                </p>
-
-                <div
-                  className={`p-6 border text-xs ${
-                    isDark
-                      ? "border-white/10 bg-black/40 backdrop-blur-md"
-                      : "border-black/5 bg-white/60 backdrop-blur-md"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 font-medium mb-3 uppercase tracking-widest text-[10px] opacity-70">
-                    <Info className="w-3.5 h-3.5" />
-                    Latest Research Scope
-                  </div>
-                  <p className="opacity-90 font-light leading-relaxed">
-                    Currently evaluating lightweight attention transformers that
-                    map human EEG sequence metrics directly to simulated
-                    brain-computer interface (BCI) diagnostic pipelines.
-                  </p>
-                </div>
-              </RevealWrapper>
-
-              {/* Research interests capsules & languages */}
-              <RevealWrapper className="lg:col-span-4 space-y-12 flex flex-col justify-center">
-                <div>
-                  <h4 className="text-[10px] uppercase tracking-widest mb-6 opacity-70 italic">
-                    Core Academic Domain Clusters
-                  </h4>
-
-                  {/* Mobile Creative Marquee */}
-                  <div 
-                    className="lg:hidden relative overflow-hidden flex flex-col gap-3 -mx-6 px-6 w-[calc(100%+3rem)]" 
-                    style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}
-                  >
-                    <motion.div
-                      className="flex w-max gap-3"
-                      animate={{ x: ["0%", "-50%"] }}
-                      transition={{ ease: "linear", duration: 25, repeat: Infinity }}
-                    >
-                      {[...personalInfo.researchInterests.filter((_, i) => i % 2 === 0), ...personalInfo.researchInterests.filter((_, i) => i % 2 === 0)].map((interest, idx) => (
-                        <span
-                          key={`r1-${idx}`}
-                          className={`px-5 py-2 border rounded-full text-[10px] uppercase tracking-widest whitespace-nowrap ${
-                            isDark
-                              ? "border-white/20 bg-black/20 text-white/90"
-                              : "border-black/20 bg-white/40 text-black/90"
-                          }`}
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                    </motion.div>
-                    <motion.div
-                      className="flex w-max gap-3"
-                      animate={{ x: ["-50%", "0%"] }}
-                      transition={{ ease: "linear", duration: 30, repeat: Infinity }}
-                    >
-                      {[...personalInfo.researchInterests.filter((_, i) => i % 2 !== 0), ...personalInfo.researchInterests.filter((_, i) => i % 2 !== 0)].map((interest, idx) => (
-                        <span
-                          key={`r2-${idx}`}
-                          className={`px-5 py-2 border rounded-full text-[10px] uppercase tracking-widest whitespace-nowrap ${
-                            isDark
-                              ? "border-orange-500/30 bg-orange-500/10 text-orange-200"
-                              : "border-orange-600/30 bg-orange-600/10 text-orange-800"
-                          }`}
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                    </motion.div>
-                  </div>
-
-                  {/* Desktop Standard Wrap */}
-                  <div className="hidden lg:flex flex-wrap gap-3">
-                    {personalInfo.researchInterests.map((interest, idx) => (
-                      <motion.span
-                        key={idx}
-                        whileHover={{
-                          scale: 1.05,
-                          rotate: idx % 2 === 0 ? 1.5 : -1.5,
-                          y: -3,
-                        }}
-                        whileTap={{
-                          scale: 0.95,
-                          rotate: 0,
-                          y: 0,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 10,
-                        }}
-                        className={`relative overflow-hidden cursor-pointer px-5 py-2 border rounded-full text-[10px] uppercase tracking-widest transition-colors duration-300 ${
-                          isDark
-                            ? "border-white/20 bg-black/20 backdrop-blur-md hover:border-orange-500/50 active:border-orange-500/50 hover:bg-orange-500/30 active:bg-orange-500/30 hover:text-white active:text-white"
-                            : "border-black/20 bg-white/40 backdrop-blur-md hover:border-orange-600/50 active:border-orange-600/50 hover:bg-orange-600/20 active:bg-orange-600/20 hover:text-black active:text-black"
-                        }`}
-                      >
-                        {/* Shine effect on hover */}
-                        <motion.span
-                          className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                          whileHover={{ x: ["-100%", "200%"] }}
-                          whileTap={{ x: ["-100%", "200%"] }}
-                          transition={{ duration: 0.8, ease: "easeInOut" }}
-                        />
-                        <span className="relative z-10">{interest}</span>
-                      </motion.span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Languages */}
-                <div
-                  className={`pt-8 border-t ${isDark ? "border-white/10" : "border-black/10"}`}
-                >
-                  <h4 className="text-[10px] uppercase tracking-widest mb-6 opacity-70 italic">
-                    Languages Spoken
-                  </h4>
-                  <div className="space-y-3 max-w-md pl-8">
-                    {personalInfo.languages.map((lang, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-xs"
-                      >
-                        <span
-                          className={`font-medium ${isDark ? "text-slate-300" : "text-slate-800"}`}
-                        >
-                          {lang.name}
-                        </span>
-                        <span className="text-slate-400 font-mono text-[10px] uppercase">
-                          {lang.level}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </RevealWrapper>
-            </div>
-          </div>
-        </motion.section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 4. COGNITIVE SANDBOX SECTION */}
-        <section id="sandbox" className={`py-24 relative`}>
-          <div className="px-6 md:px-12 w-full">
-            <ResearchSandbox
-              theme={theme}
-              onTaskChange={(task) => setActiveCanvasTask(task)}
-            />
-          </div>
-        </section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 5. RESEARCH PORTFOLIO SECTION */}
-        <motion.section
-          id="portfolio"
-          className={`py-24 relative overflow-hidden`}
-          initial={{ opacity: 0, y: 60, filter: "blur(10px) brightness(0.8)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px) brightness(1)" }}
-          viewport={{ once: true, amount: 0, margin: "0px" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {/* Parallax Background Element */}
-          <motion.div
-            className={`absolute top-[20%] left-[-10%] w-[600px] h-[600px] rounded-full blur-[100px] opacity-10 pointer-events-none ${isDark ? "bg-blue-500/20" : "bg-blue-300/30"}`}
-            style={{ y: useTransform(scrollYProgress, [0, 1], [300, -300]) }}
-          />
-          <div className="px-6 md:px-12 w-full space-y-12 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[11px] uppercase tracking-widest opacity-60 italic mb-2">
-                01 / Selected Works
-              </span>
-              <h2 className="text-4xl font-serif tracking-tight">
-                Publications & Empirical Research
-              </h2>
-            </div>
-
-            <Suspense
-              fallback={
-                <div className="w-full h-32 flex items-center justify-center opacity-50">
-                  <div className="animate-pulse">
-                    Loading PublicationsList...
-                  </div>
-                </div>
-              }
-            >
-              <PublicationsList theme={theme} />
-            </Suspense>
-          </div>
-        </motion.section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 5B. EDUCATION SPIRAL SECTION */}
-        <motion.section
-          className={`relative`}
-          initial={{ opacity: 0, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0, margin: "0px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <Suspense
-            fallback={
-              <div className="w-full h-32 flex items-center justify-center opacity-50">
-                <div className="animate-pulse">Loading EducationSpiral...</div>
-              </div>
-            }
-          >
-            <EducationSpiral theme={theme} />
-          </Suspense>
-        </motion.section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 6. CHRONICLE (TIMELINE) SECTION */}
-        <motion.section
-          id="chronicle"
-          className={`py-24 relative`}
-          initial={{ opacity: 0, x: -60, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0, margin: "0px" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="px-6 md:px-12 w-full space-y-12">
-            <div className="flex flex-col">
-              <span className="text-[11px] uppercase tracking-widest opacity-60 italic mb-2">
-                03 / Professional Experience
-              </span>
-              <h2 className="text-4xl font-serif tracking-tight">
-                Chronological Journey
-              </h2>
-            </div>
-
-            <Suspense
-              fallback={
-                <div className="w-full h-32 flex items-center justify-center opacity-50">
-                  <div className="animate-pulse">
-                    Loading AcademicTimeline...
-                  </div>
-                </div>
-              }
-            >
-              <AcademicTimeline theme={theme} />
-            </Suspense>
-          </div>
-        </motion.section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 7. TECHNICAL SKILLS SECTION */}
-        <Suspense
-          fallback={
-            <div className="w-full h-32 flex items-center justify-center opacity-50">
-              <div className="animate-pulse">Loading TechnicalSkills...</div>
-            </div>
-          }
-        >
-          <TechnicalSkills isDark={isDark} />
-        </Suspense>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 8. CREATIVE CORNER (GENERATIVE FLOCKING SIMULATOR) */}
-        <section id="creative" className={`py-24 relative`}>
-          <div className="px-6 md:px-12 w-full space-y-12">
-            <div className="flex flex-col">
-              <span className="text-[11px] uppercase tracking-widest opacity-60 italic mb-2">
-                04 / Current Obsession
-              </span>
-              <h2 className="text-4xl font-serif tracking-tight">
-                <RevealText text="Fluid Systems Visualizer" />
-              </h2>
-              <p className="opacity-90 font-light max-w-2xl mt-4">
-                Exploring complex adaptive systems, cellular automata, and swarm
-                intelligence algorithms visually. Click inside the viewport to
-                interact directly with the flocking agents.
-              </p>
-            </div>
-
-            <Suspense
-              fallback={
-                <div className="w-full h-32 flex items-center justify-center opacity-50">
-                  <div className="animate-pulse">Loading GenerativeArt...</div>
-                </div>
-              }
-            >
-              <GenerativeArt theme={theme} />
-            </Suspense>
-          </div>
-        </section>
-
-        <SectionDivider isDark={isDark} />
-
-        {/* 9. CONTACT & FOOTER SECTION */}
-        <motion.section
-          id="contact"
-          className={`mt-8 pt-16 pb-12 relative`}
-          initial={{ opacity: 0, y: 60, scale: 0.95, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0, margin: "0px" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="px-6 md:px-12 w-full">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 mb-20">
-              <div className="space-y-6 max-w-xl">
-                <span className="text-[11px] uppercase tracking-widest opacity-60 italic block">
-                  05 / Get In Touch
-                </span>
-                <h2 className="text-4xl md:text-6xl font-serif tracking-tight">
-                  Let's Connect
-                </h2>
-                <p className="text-sm font-light opacity-70 max-w-sm leading-relaxed">
-                  Open to research collaborations and conversations exploring
-                  the computational boundaries of intelligence.
-                </p>
-              </div>
-
-              {/* Big clickable email CTA */}
-              <a
-                href="mailto:georgeokelloouma@gmail.com"
-                className="group inline-flex items-center gap-3 text-lg md:text-2xl font-light border-b pb-2 border-current/20 hover:border-current/60 transition-colors w-fit relative"
-              >
-                <div className="relative flex items-center justify-center">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-40 animate-ping"></span>
-                  <Mail className="w-5 h-5 opacity-80 group-hover:opacity-100 group-active:opacity-100 transition-opacity relative" />
-                </div>
-                <span>georgeokelloouma@gmail.com</span>
-                <ArrowRight className="w-5 h-5 -translate-x-1 opacity-0 group-hover:opacity-100 group-active:opacity-100 group-hover:translate-x-0 group-active:translate-x-0 transition-all" />
-              </a>
-            </div>
-
-            <div
-              className={`h-px w-full ${isDark ? "bg-white/10" : "bg-black/10"} mb-8`}
-            />
-
-            <footer className="flex flex-col lg:flex-row justify-between items-center gap-6 text-center">
-              <div className="text-[10px] uppercase tracking-[0.3em] opacity-60">
-                © {new Date().getFullYear()} George Okello
-              </div>
-
-              <div className="flex gap-10">
-                <a
-                  href="https://georgyokesh112.artstation.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative flex items-center gap-1.5 text-xs font-medium opacity-80 hover:opacity-100 transition-opacity py-1"
-                >
-                  ArtStation
-                  <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100 group-active:opacity-100 transition-opacity" />
-                  <span className="absolute bottom-0 left-0 w-full h-[1px] bg-current origin-right scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 group-active:scale-x-100 group-hover:origin-left group-active:origin-left" />
-                </a>
-                <div className="flex items-center gap-1.5 text-xs font-medium opacity-80">
-                  <MapPin className="w-3 h-3 opacity-60" />
-                  {personalInfo.location}
-                </div>
-              </div>
-            </footer>
-          </div>
-        </motion.section>
-
-        {/* Back to Top Button */}
-        <AnimatePresence>
-          {showBackToTop && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed bottom-8 right-8 z-50"
-            >
-              <MagneticWrapper>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() =>
-                    window.scrollTo({ top: 0, behavior: "smooth" })
-                  }
-                  className={`p-3 rounded-full shadow-lg border transition-colors ${
-                    isDark
-                      ? "bg-[#0B0F19] border-white/20 text-white hover:bg-white hover:text-black"
-                      : "bg-[#FAFAF9] border-black/20 text-black hover:bg-black hover:text-white"
-                  }`}
-                  aria-label="Back to top"
-                >
-                  <ArrowUp className="w-5 h-5" />
-                </motion.button>
-              </MagneticWrapper>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </>
+          <Terminal className="w-3.5 h-3.5 text-orange-highlight group-hover:text-white transition-colors duration-300 animate-pulse" />
+          <span className="font-bold">[_terminal_cli]</span>
+        </motion.button>
+      </motion.div>
+    </div>
   );
 }
